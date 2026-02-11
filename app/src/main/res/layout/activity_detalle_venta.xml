@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light">
+
+    <!-- Header -->
+    <cl.ione.simuladorapptoapp.components.Header
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:title="Detalle de Venta"
+        app:showBackButton="true" />
+
+    <!-- Contenedor Principal Centrado -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/footerContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header">
+
+        <!-- CardView Circular con ícono -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardIcon"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            app:cardBackgroundColor="@color/primary_red_light"
+            app:cardCornerRadius="70dp"
+            app:cardElevation="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:id="@+id/btnIniciarVenta"
+                android:layout_width="140dp"
+                android:layout_height="140dp"
+                android:background="@android:color/transparent"
+                android:scaleType="center"
+                android:src="@drawable/terminalcopy" />
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Texto de instrucción -->
+        <TextView
+            android:id="@+id/tvInstruccion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:text="Toca el icono o presiona IMPRIMIR\npara generar el detalle de venta"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardIcon" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Footer Buttons -->
+    <LinearLayout
+        android:id="@+id/footerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_main"
+        android:orientation="vertical"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <cl.ione.simuladorapptoapp.components.FooterButtons
+            android:id="@+id/footerButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:primaryText="CANCELAR"
+            app:secondaryText="INICIAR" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

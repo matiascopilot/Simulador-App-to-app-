@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">A2A Sim</string>
+
+    <!-- Iconos -->
+    <string name="app_logo">Logo de la aplicación</string>
+    <string name="icon_sale">Icono de venta</string>
+    <string name="icon_void">Icono de anulación</string>
+    <string name="icon_refund">Icono de devolución</string>
+    <string name="icon_duplicate">Icono de duplicado</string>
+    <string name="icon_history">Icono de historial</string>
+    <string name="icon_batch">Icono de cierre de lote</string>
+    <string name="icon_info">Icono de información</string>
+    <string name="icon_chevron">Icono de flecha</string>
+
+    <!-- Títulos -->
+    <string name="new_sale">Venta</string>
+    <string name="void_transaction">Anulación</string>
+    <string name="refund">Devolución</string>
+    <string name="duplicate">Duplicado</string>
+    <string name="sales_history">Detalle de Ventas</string>
+    <string name="batch_closure">Cierre de Caja</string>
+    <string name="section_commands">COMANDOS</string>
+    <string name="print_service">Servicio de impresión</string>
+
+    <!-- Descripciones -->
+    <string name="sale_description">Procesar una nueva transacción</string>
+    <string name="void_description">Cancelar una venta</string>
+    <string name="refund_description">Devolver dinero a un cliente</string>
+    <string name="duplicate_description">Imprimir o compartir último ticket</string>
+    <string name="history_description">Revisar todas las transacciones diarias</string>
+    <string name="batch_description">Cierre de registro transaccionales</string>
+    <string name="print_description">Funcionamiento de Impresion</string>
+
+
+    <string name="button_primary">Primario</string>
+    <string name="button_secondary">Secundario</string>
+    <string name="accept">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="contin">Continuar</string>
+    <string name="save">Guardar</string>
+    <string name="delete">Eliminar</string>
+    <string name="confirm">Confirmar</string>
+
+<!--    CIERRE ACTIVITY-->
+
+    <string name="realizar_cierre">Realiza el cierre diario de operaciones</string>
+    <string name="confirmar_solitud">Al confirmar se enviará la solicitud</string>
+</resources>

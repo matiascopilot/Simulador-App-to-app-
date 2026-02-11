@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colores principales -->
+    <color name="primary_red">#ec0000</color>
+    <color name="primary_red_light">#FF5252</color>
+    <color name="primary_red_dark">#B71C1C</color>
+    <color name="primary_yellow">#FFCC00</color>
+    <color name="white">#FFFFFF</color>
+    <color name="white_pure">#FFFFFFFF</color>
+    <color name="gray">#BFBFBF</color>
+
+    <!-- Fondos -->
+    <color name="background_main">#E8F2F6</color>
+    <color name="background_light">#E8F2F6</color>
+    <color name="background_dark">#0F172A</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="nav_background">#FFFFFFE6</color>
+    <color name="nav_indicator">#CBD5E1</color>
+    <!-- Texto -->
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#64748B</color>
+    <color name="text_getnet">#ec0000</color>
+    <!-- Colores de iconos -->
+    <color name="purple_light">#F3E8FF</color>
+    <color name="purple_dark">#7C3AED</color>
+
+    <color name="teal_light">#CCFBF1</color>
+    <color name="teal_dark">#0D9488</color>
+
+    <color name="blue_light">#DBEAFE</color>
+    <color name="blue_dark">#2563EB</color>
+
+    <color name="amber_light">#FEF3C7</color>
+    <color name="amber_dark">#D97706</color>
+
+    <color name="emerald_light">#D1FAE5</color>
+    <color name="emerald_dark">#059669</color>
+
+
+    <color name="cyan_light">#CFFAFE</color>
+    <color name="cyan_dark">#0891B2</color>
+
+    <color name="red_light">#FEE2E2</color>
+    <color name="red_dark">#DC2626</color>
+
+
+
+</resources>

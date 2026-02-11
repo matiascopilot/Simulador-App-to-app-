@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="#EC0000">
+
+    <!-- Espacio superior automático con layout_weight -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Logo Getnet -->
+    <ImageView
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/icono"
+        android:layout_marginBottom="16dp"
+        android:adjustViewBounds="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Simulador App to App"
+        android:textSize="20sp"
+        android:textColor="#ffffff"
+        android:alpha="0.9"
+        android:layout_marginBottom="40dp" />
+
+    <!-- Progress bar -->
+    <ProgressBar
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:indeterminateTint="#ffffff" />
+
+    <!-- Espacio flexible -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Versión - abajo -->
+    <TextView
+        android:id="@+id/txtVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:alpha="0.6"
+        android:textColor="#ffffff"
+        android:textSize="14sp"
+        android:text="Versión 1.0.0" />
+
+</LinearLayout>

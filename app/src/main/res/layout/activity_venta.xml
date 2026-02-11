@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
+    android:orientation="vertical">
+
+    <!-- Header personalizado -->
+    <cl.ione.simuladorapptoapp.components.Header
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:showBackButton="true"
+        app:title="Venta" />
+
+    <!-- ScrollView para el contenido desplazable -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/background_main"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Monto -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="Monto ($)"
+                app:boxBackgroundColor="?attr/colorSurface"
+                app:boxStrokeColor="?attr/colorOnSurface"
+                app:hintTextColor="?attr/colorOnSurface">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etAmount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    android:text="15000"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Ticket Number -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="68dp"
+                android:layout_marginBottom="16dp"
+                android:hint="Ticket Number"
+                app:boxBackgroundColor="?attr/colorSurface"
+                app:boxStrokeColor="?attr/colorOnSurface"
+                app:counterEnabled="true"
+                app:counterMaxLength="10"
+                app:hintTextColor="?attr/colorOnSurface">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTicketNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="10"
+                    android:text="ABC1234567"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- PrintOnPos -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="¿Imprimir en POS?"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="16sp" />
+
+            <RadioGroup
+                android:id="@+id/rgPrintOnPos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbPrintYes"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="Sí"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14dp" />
+
+                <RadioButton
+                    android:id="@+id/rbPrintNo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="No"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14dp" />
+
+            </RadioGroup>
+
+            <!-- SaleType -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Tipo de Venta"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="16sp" />
+
+            <Spinner
+                android:id="@+id/spinnerSaleType"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/input_background"
+                android:paddingHorizontal="12dp"
+                android:popupBackground="?attr/colorSurface" />
+
+            <!-- EmployeeId -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Employee ID"
+                app:boxBackgroundColor="?attr/colorSurface"
+                app:boxStrokeColor="?attr/colorOnSurface"
+                app:counterEnabled="true"
+                app:counterMaxLength="4"
+                app:hintTextColor="?attr/colorOnSurface">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEmployeeId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="4"
+                    android:text="0001"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Componente FooterButtons personalizado -->
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_main"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <cl.ione.simuladorapptoapp.components.FooterButtons
+            android:id="@+id/footerButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:primaryText="VOLVER"
+            app:secondaryText="CONFIRMAR" />
+    </LinearLayout>
+
+</LinearLayout>

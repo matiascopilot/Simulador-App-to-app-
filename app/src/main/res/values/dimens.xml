@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pantalla -->
+    <dimen name="screen_padding_horizontal">20dp</dimen>
+    <dimen name="screen_padding_vertical">20dp</dimen>
+
+    <!-- Header -->
+    <dimen name="header_padding_top">24dp</dimen>
+    <dimen name="header_padding_bottom">16dp</dimen>
+
+    <!-- Iconos -->
+    <dimen name="icon_size_small">20dp</dimen>
+    <dimen name="icon_size_medium">32dp</dimen>
+    <dimen name="icon_size_large">48dp</dimen>
+    <dimen name="feature_icon_size">48dp</dimen>
+    <dimen name="feature_icon_inner">28dp</dimen>
+    <dimen name="command_icon_size">60dp</dimen>
+    <dimen name="command_icon_inner">32dp</dimen>
+    <dimen name="chevron_size">24dp</dimen>
+    <dimen name="info_icon_size">20dp</dimen>
+
+    <!-- Bordes redondeados -->
+    <dimen name="corner_radius_xsmall">4dp</dimen>
+    <dimen name="corner_radius_small">8dp</dimen>
+    <dimen name="corner_radius_medium">16dp</dimen>
+    <dimen name="corner_radius_large">24dp</dimen>
+
+    <!-- Espaciado -->
+    <dimen name="spacing_xxsmall">2dp</dimen>
+    <dimen name="spacing_xsmall">4dp</dimen>
+    <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_medium">16dp</dimen>
+    <dimen name="spacing_large">24dp</dimen>
+    <dimen name="spacing_xlarge">32dp</dimen>
+    <dimen name="spacing_xxlarge">48dp</dimen>
+
+    <!-- Tarjetas -->
+    <dimen name="card_padding">20dp</dimen>
+    <dimen name="card_padding_medium">16dp</dimen>
+    <dimen name="card_padding_small">12dp</dimen>
+    <dimen name="card_margin_vertical">24dp</dimen>
+    <dimen name="card_spacing">12dp</dimen>
+
+    <!-- Padding inferior -->
+    <dimen name="bottom_padding_large">12dp</dimen>
+    <dimen name="bottom_padding_extra_large">100dp</dimen>
+
+    <!-- Tamaños de texto -->
+    <dimen name="text_size_xsmall">11sp</dimen>
+    <dimen name="text_size_small">13sp</dimen>
+    <dimen name="text_size_medium">16sp</dimen>
+    <dimen name="text_size_medium_large">18sp</dimen>
+    <dimen name="text_size_large">24sp</dimen>
+    <dimen name="text_size_xlarge">28sp</dimen>
+
+    <!-- Espaciado de línea -->
+    <dimen name="line_spacing_small">2dp</dimen>
+    <dimen name="line_spacing_medium">4dp</dimen>
+
+    <!-- Agrega esto a tu archivo dimens.xml -->
+    <dimen name="footer_button_height">48dp</dimen>
+    <dimen name="footer_button_corner">24dp</dimen>
+    <dimen name="footer_button_spacing">16dp</dimen>
+    <dimen name="footer_padding">16dp</dimen>
+</resources>

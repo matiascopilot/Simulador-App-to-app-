@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_light">
+
+    <!-- Header Component -->
+    <cl.ione.simuladorapptoapp.components.Header
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Contenido Principal -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_vertical">
+
+            <!-- Card de Duplicado -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@android:color/white">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <!-- Icono -->
+                    <ImageView
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="16dp"
+                        android:contentDescription="Icono duplicado"
+                        android:src="@drawable/duplicado" />
+
+                    <!-- Título -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="24dp"
+                        android:text="Duplicado"
+                        android:textColor="@color/text_primary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <!-- Campo: Operation ID -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="N° de Comprobante"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        app:boxCornerRadiusBottomEnd="8dp"
+                        app:boxCornerRadiusBottomStart="8dp"
+                        app:boxCornerRadiusTopEnd="8dp"
+                        app:boxCornerRadiusTopStart="8dp"
+                        app:boxStrokeColor="@color/primary_red"
+                        app:boxStrokeWidth="2dp"
+                        app:hintTextColor="@color/primary_red">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etOperationId"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:hint=""
+                            android:inputType="number"
+                            android:maxLength="20"
+                            android:textSize="16sp"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- PrintOnPos -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="¿Imprimir duplicado?"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="16sp" />
+
+                    <RadioGroup
+                        android:id="@+id/rgPrintOnPos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/rbPrintYes"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:checked="true"
+                            android:text="Sí"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="16sp" />
+
+                        <RadioButton
+                            android:id="@+id/rbPrintNo"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="No"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="16sp" />
+
+                    </RadioGroup>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_main"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <cl.ione.simuladorapptoapp.components.FooterButtons
+            android:id="@+id/footerButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:primaryText="VOLVER"
+            app:secondaryText="CONFIRMAR" />
+
+    </LinearLayout>
+
+</LinearLayout>

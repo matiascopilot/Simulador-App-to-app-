@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- TEMA PRINCIPAL CON MATERIAL DESIGN 3 -->
+    <style name="Theme.SimuladorAppToApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Personaliza tu tema aquí -->
+        <item name="colorPrimary">@color/primary_red</item>
+        <item name="colorPrimaryContainer">@color/primary_red_light</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <item name="colorSecondary">@color/primary_yellow</item>
+        <item name="colorSecondaryContainer">#FFEECC</item>
+        <item name="colorOnSecondary">@color/text_primary</item>
+
+        <item name="colorSurface">@color/card_background</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorSurfaceVariant">@color/background_light</item>
+
+        <!-- Barra de estado -->
+        <item name="android:statusBarColor">@color/primary_red_dark</item>
+        <item name="android:navigationBarColor">@color/background_dark</item>
+
+        <!-- Texto -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+    </style>
+
+    <!-- ===== ESTILOS PARA BOTONES REDONDOS ===== -->
+
+    <!-- Botón Outlined Redondo -->
+    <style name="Widget.MaterialComponents.Button.RoundedOutlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="cornerRadius">50dp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:minWidth">88dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:textSize">14sp</item>
+        <item name="strokeWidth">2dp</item>
+    </style>
+
+    <!-- Botón Filled Redondo -->
+    <style name="Widget.MaterialComponents.Button.RoundedFilled" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">50dp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:minWidth">88dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- VARIANTES CON COLORES ESPECÍFICOS -->
+
+    <!-- Botón Outlined Rojo (Primario) -->
+    <style name="Widget.MaterialComponents.Button.RoundedOutlined.Red" parent="Widget.MaterialComponents.Button.RoundedOutlined">
+        <item name="strokeColor">@color/primary_red</item>
+        <item name="android:textColor">@color/primary_red</item>
+        <item name="backgroundTint">@color/white</item>
+        <item name="rippleColor">@color/primary_red_light</item>
+    </style>
+
+    <!-- Botón Filled Rojo (Secundario) -->
+    <style name="Widget.MaterialComponents.Button.RoundedFilled.Red" parent="Widget.MaterialComponents.Button.RoundedFilled">
+        <item name="backgroundTint">@color/primary_red</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="rippleColor">@color/primary_red_dark</item>
+    </style>
+</resources>

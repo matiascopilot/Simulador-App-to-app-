@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/headerRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@color/white"
+    android:paddingVertical="16dp"
+    android:paddingHorizontal="16dp"
+    android:gravity="center_vertical"
+    android:elevation="4dp">
+
+    <!-- Botón de retroceso -->
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/sensation_button"
+        android:src="@drawable/ic_arrow_back"
+        android:visibility="visible" />
+
+    <!-- Título centrado -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Título"
+        android:textColor="@color/primary_red"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:paddingHorizontal="8dp" />
+
+    <Space
+        android:id="@+id/spaceRight"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
+
+</LinearLayout>
