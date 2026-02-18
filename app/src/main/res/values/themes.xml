@@ -3,8 +3,8 @@
     <!-- TEMA PRINCIPAL CON MATERIAL DESIGN 3 -->
     <style name="Theme.SimuladorAppToApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Personaliza tu tema aquí -->
-        <item name="colorPrimary">@color/primary_red</item>
-        <item name="colorPrimaryContainer">@color/primary_red_light</item>
+        <item name="colorPrimary">#ec0000</item>
+        <item name="colorPrimaryContainer">#ec0000</item>
         <item name="colorOnPrimary">@color/white</item>
 
         <item name="colorSecondary">@color/primary_yellow</item>
@@ -16,8 +16,8 @@
         <item name="colorSurfaceVariant">@color/background_light</item>
 
         <!-- Barra de estado -->
-        <item name="android:statusBarColor">@color/primary_red_dark</item>
-        <item name="android:navigationBarColor">@color/background_dark</item>
+        <item name="android:statusBarColor">@color/text_getnet</item>
+        <item name="android:navigationBarColor">#000000</item>
 
         <!-- Texto -->
         <item name="android:textColorPrimary">@color/text_primary</item>

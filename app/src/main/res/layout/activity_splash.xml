@@ -27,6 +27,13 @@
         android:textSize="20sp"
         android:textColor="#ffffff"
         android:alpha="0.9"
+        android:layout_marginBottom="10dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Libreria y JSON"
+        android:textSize="14sp"
+        android:textColor="#D8CFCF"
         android:layout_marginBottom="40dp" />
 
     <!-- Progress bar -->
@@ -41,15 +48,21 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <!-- Versión - abajo -->
+    <ImageView
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/logoblanco" />
+
     <TextView
         android:id="@+id/txtVersion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="30dp"
         android:alpha="0.6"
         android:textColor="#ffffff"
         android:textSize="14sp"
-        android:text="Versión 1.0.0" />
+        android:text="Versión " />
 
 </LinearLayout>

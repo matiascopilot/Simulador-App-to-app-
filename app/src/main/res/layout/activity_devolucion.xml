@@ -6,177 +6,173 @@
     android:orientation="vertical"
     android:background="@color/background_light">
 
-    <!-- Header Component -->
+    <!-- Header Component - Fijo arriba -->
     <cl.ione.simuladorapptoapp.components.Header
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <!-- Contenido Principal -->
-    <ScrollView
+    <!-- Contenedor principal que ocupa todo el espacio restante -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
-        <LinearLayout
+        <!-- Card de Devolución - Centrado verticalmente -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center_vertical">
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@android:color/white">
 
-            <!-- Card de Devolución -->
-            <androidx.cardview.widget.CardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@android:color/white">
+                android:orientation="vertical"
+                android:padding="24dp">
 
-                <LinearLayout
+                <!-- Icono -->
+                <ImageView
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="16dp"
+                    android:contentDescription="Icono devolución"
+                    android:src="@drawable/devolucion" />
+
+                <!-- Título -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="24dp"
+                    android:text="Devolución de Venta"
+                    android:textColor="@color/text_primary"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <!-- Campo: Authorization Code -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Código de Autorización"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="24dp">
+                    android:layout_marginBottom="16dp"
+                    app:boxCornerRadiusBottomEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    app:boxCornerRadiusTopStart="8dp"
+                    app:boxStrokeColor="@color/primary_red"
+                    app:boxStrokeWidth="2dp"
+                    app:hintTextColor="@color/primary_red"
+                    app:placeholderText="Ej: 123456">
 
-                    <!-- Icono -->
-                    <ImageView
-                        android:layout_width="72dp"
-                        android:layout_height="72dp"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="16dp"
-                        android:contentDescription="Icono devolución"
-                        android:src="@drawable/devolucion" />
-
-                    <!-- Título -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="24dp"
-                        android:text="Devolución de Venta"
-                        android:textColor="@color/text_primary"
-                        android:textSize="24sp"
-                        android:textStyle="bold" />
-
-                    <!-- Campo: Authorization Code -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Código de Autorización"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="4dp" />
-
-                    <com.google.android.material.textfield.TextInputLayout
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etAuthorizationCode"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        app:boxCornerRadiusBottomEnd="8dp"
-                        app:boxCornerRadiusBottomStart="8dp"
-                        app:boxCornerRadiusTopEnd="8dp"
-                        app:boxCornerRadiusTopStart="8dp"
-                        app:boxStrokeColor="@color/primary_red"
-                        app:boxStrokeWidth="2dp"
-                        app:hintTextColor="@color/primary_red">
+                        android:inputType="text"
+                        android:maxLength="20"
+                        android:textSize="16sp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp" />
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etAuthorizationCode"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint=""
-                            android:inputType="number"
-                            android:maxLength="20"
-                            android:textSize="16sp"
-                            android:paddingStart="16dp"
-                            android:paddingEnd="16dp" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                <!-- Campo: Amount -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Monto a Devolver"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp" />
 
-                    <!-- Campo: Amount -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Monto a Devolver"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="4dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    app:boxCornerRadiusBottomEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    app:boxCornerRadiusTopStart="8dp"
+                    app:boxStrokeColor="@color/primary_red"
+                    app:boxStrokeWidth="2dp"
+                    app:hintTextColor="@color/primary_red"
+                    app:placeholderText="Ej: $1.000">
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etAmount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="20dp"
-                        app:boxCornerRadiusBottomEnd="8dp"
-                        app:boxCornerRadiusBottomStart="8dp"
-                        app:boxCornerRadiusTopEnd="8dp"
-                        app:boxCornerRadiusTopStart="8dp"
-                        app:boxStrokeColor="@color/primary_red"
-                        app:boxStrokeWidth="2dp"
-                        app:hintTextColor="@color/primary_red">
+                        android:inputType="number"
+                        android:maxLength="12"
+                        android:textSize="16sp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp" />
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etAmount"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint=""
-                            android:inputType="number"
-                            android:maxLength="10"
-                            android:textSize="16sp"
-                            android:paddingStart="16dp"
-                            android:paddingEnd="16dp" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                <!-- PrintOnPos -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="¿Imprimir comprobante?"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp" />
 
-                    <!-- PrintOnPos -->
-                    <TextView
-                        android:layout_width="wrap_content"
+                <RadioGroup
+                    android:id="@+id/rgPrintOnPos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/rbPrintYes"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="¿Imprimir comprobante?"
+                        android:layout_weight="1"
+                        android:checked="true"
+                        android:text="Sí"
                         android:textColor="?attr/colorOnSurface"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
 
-                    <RadioGroup
-                        android:id="@+id/rgPrintOnPos"
-                        android:layout_width="match_parent"
+                    <RadioButton
+                        android:id="@+id/rbPrintNo"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:orientation="horizontal">
+                        android:layout_weight="1"
+                        android:text="No"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="14sp" />
 
-                        <RadioButton
-                            android:id="@+id/rbPrintYes"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:checked="true"
-                            android:text="Sí"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="16sp" />
+                </RadioGroup>
 
-                        <RadioButton
-                            android:id="@+id/rbPrintNo"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="No"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="16sp" />
+            </LinearLayout>
 
-                    </RadioGroup>
+        </androidx.cardview.widget.CardView>
 
-                </LinearLayout>
+    </LinearLayout>
 
-            </androidx.cardview.widget.CardView>
-
-        </LinearLayout>
-
-    </ScrollView>
-
+    <!-- Footer - Fijo abajo -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background_main"
         android:orientation="vertical"
         android:padding="8dp">
 

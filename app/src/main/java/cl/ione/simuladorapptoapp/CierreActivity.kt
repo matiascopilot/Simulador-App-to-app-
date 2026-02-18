@@ -12,21 +12,24 @@ import cl.getnet.payment.interop.parcels.CloseRequest
 class CierreActivity : AppCompatActivity() {
 
  private lateinit var binding: ActivityCierreBinding
- private val REQUEST_CODE_CIERRE = 3443
+ private val REQUEST_CODE_CIERRE = 3448
  private val TAG = "CierreActivity"
+ private var isCommandsMode: Boolean = false
 
  override fun onCreate(savedInstanceState: Bundle?) {
   super.onCreate(savedInstanceState)
   binding = ActivityCierreBinding.inflate(layoutInflater)
   setContentView(binding.root)
 
+  isCommandsMode = intent.getBooleanExtra("isCommandsMode", false)
   configurarHeader()
   configurarListeners()
  }
 
  private fun configurarHeader() {
+  val titulo = if (isCommandsMode) "Cierre JSON" else "Cierre de Caja"
   binding.header.setup(
-   title = "Cierre de Caja",
+   title = titulo,
    showBackButton = true,
    onBackClick = { finish() }
   )
@@ -44,26 +47,45 @@ class CierreActivity : AppCompatActivity() {
  private fun solicitarCierre() {
   try {
    val typeApp: Byte = 0
-   val request = CloseRequest(typeApp)
+   val printOnPos: Boolean = true
    val intent = Intent("cl.getnet.payment.action.CLOSE")
-   intent.putExtra("params", request)
-   startActivityForResult(intent, REQUEST_CODE_CIERRE)
-   Log.d(TAG, "CloseRequest enviado - typeApp: $typeApp")
+
+   if (isCommandsMode) {
+    val closeRequestJson = """
+                {
+                    "PrintOnPos": $printOnPos,
+                    "TypeApp": $typeApp,
+                    "PaymentResultTimeout": 2
+                }
+                """.trimIndent()
+    intent.putExtra("params", closeRequestJson)
+    Log.d(TAG, "JSON Request: $closeRequestJson")
+   } else {
+    val request = CloseRequest(typeApp)
+    intent.putExtra("params", request)
+    Log.d(TAG, "CloseRequest: $typeApp")
+   }
+
+   val actividades = packageManager.queryIntentActivities(intent, 0)
+   if (actividades.isNotEmpty()) {
+    startActivityForResult(intent, REQUEST_CODE_CIERRE)
+   } else {
+    Toast.makeText(this,
+     "Getnet no está disponible en este dispositivo",
+     Toast.LENGTH_LONG).show()
+   }
 
   } catch (e: Exception) {
-   Log.e(TAG, "Error al solicitar cierre: ${e.message}", e)
+   Log.e(TAG, "Error: ${e.message}", e)
    Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
-   e.printStackTrace()
   }
  }
 
  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
   super.onActivityResult(requestCode, resultCode, data)
 
-  when (requestCode) {
-   REQUEST_CODE_CIERRE -> {
-    procesarRespuestaCierre(resultCode, data)
-   }
+  if (requestCode == REQUEST_CODE_CIERRE) {
+   procesarRespuestaCierre(resultCode, data)
   }
  }
 
@@ -71,28 +93,26 @@ class CierreActivity : AppCompatActivity() {
   when (resultCode) {
    RESULT_OK -> {
     JsonParser.showCierreResult(this, data)
-    Log.d(TAG, "Cierre exitoso - Response: ${data?.getSerializableExtra("response")}")
    }
-
    RESULT_CANCELED -> {
-    // Cierre cancelado o error
     val error = data?.getStringExtra("error") ?: "Operación cancelada"
-    Toast.makeText(this, error, Toast.LENGTH_LONG).show()
-    Log.e(TAG, "Cierre fallido: $error")
+    mostrarResultado("CIERRE CANCELADO\n\n$error")
    }
-
    else -> {
-    Toast.makeText(this, "Error inesperado", Toast.LENGTH_LONG).show()
-    Log.e(TAG, "ResultCode inesperado: $resultCode")
+    val errorMsg = data?.getStringExtra("error") ?:
+    data?.getStringExtra("message") ?:
+    "Error desconocido"
+    mostrarResultado("CIERRE RECHAZADO\n\nMotivo: $errorMsg")
    }
   }
  }
 
- override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
-  if (item.itemId == android.R.id.home) {
-   finish()
-   return true
-  }
-  return super.onOptionsItemSelected(item)
+ private fun mostrarResultado(mensaje: String) {
+  android.app.AlertDialog.Builder(this)
+   .setTitle("Resultado de Cierre")
+   .setMessage(mensaje)
+   .setPositiveButton("ACEPTAR") { _, _ -> finish() }
+   .setCancelable(false)
+   .show()
  }
 }

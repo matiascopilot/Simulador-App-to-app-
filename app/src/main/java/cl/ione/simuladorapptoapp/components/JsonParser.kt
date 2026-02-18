@@ -23,6 +23,7 @@ object JsonParser {
                 .setPositiveButton("ACEPTAR") { dialog, _ ->
                     dialog.dismiss()
                     currentDialog = null
+                    activity.finish()
                 }.setOnDismissListener {
                     currentDialog = null
                 }
@@ -50,6 +51,7 @@ object JsonParser {
                 .setPositiveButton("ACEPTAR") { dialog, _ ->
                     dialog.dismiss()
                     currentDialog = null
+                    activity.finish()
                 }.setOnDismissListener {
                     currentDialog = null
                 }
@@ -336,7 +338,9 @@ object JsonParser {
                 .setPositiveButton("ACEPTAR") { dialog, _ ->
                     dialog.dismiss()
                     currentDialog = null
-                }.setOnDismissListener {
+                    activity.finish()
+                }
+                .setOnDismissListener {
                     currentDialog = null
                 }
                 .setCancelable(false)
@@ -418,6 +422,7 @@ object JsonParser {
                 .setPositiveButton("ACEPTAR") { dialog, _ ->
                     dialog.dismiss()
                     currentDialog = null
+                    activity.finish()
                 }.setOnDismissListener {
                     currentDialog = null
                 }
@@ -475,7 +480,36 @@ object JsonParser {
     fun showDuplicadoResult(activity: android.app.Activity, data: Intent?) {
         currentDialog?.dismiss()
         try {
-            val (status, jsonFormatted) = parseDuplicadoResponse(data)
+            val (status, jsonObject) = parseDuplicadoResponseDetailed(data)
+
+            // Crear un nuevo JSONObject con el orden específico
+            val orderedJson = JSONObject()
+
+            // Agregar campos en el orden solicitado
+            orderedJson.put("FunctionCode", jsonObject.optInt("FunctionCode", 109))
+            orderedJson.put("ResponseCode", jsonObject.optString("ResponseCode", "0"))
+            orderedJson.put("ResponseMessage", jsonObject.optString("ResponseMessage", "Aprobado"))
+            orderedJson.put("CommerceCode", jsonObject.optLong("CommerceCode", 550062700310))
+            orderedJson.put("TerminalId", jsonObject.optString("TerminalId", "ABC1234C"))
+            orderedJson.put("Ticket", jsonObject.optString("Ticket", "123456789012345678901234"))
+            orderedJson.put("AuthorizationCode", jsonObject.optString("AuthorizationCode", "XZ123456"))
+            orderedJson.put("Amount", jsonObject.optInt("Amount", 15000))
+            orderedJson.put("SharesNumber", jsonObject.optInt("SharesNumber", 3))
+            orderedJson.put("SharesAmount", jsonObject.optInt("SharesAmount", 5000))
+            orderedJson.put("Last4Digits", jsonObject.optInt("Last4Digits", 6677))
+            orderedJson.put("OperationId", jsonObject.optInt("OperationId", 60))
+            orderedJson.put("CardType", jsonObject.optString("CardType", "CR"))
+            orderedJson.put("AccountingDate", jsonObject.optString("AccountingDate", "2023-12-28 22:35:12"))
+            orderedJson.put("AccountNumber", jsonObject.optString("AccountNumber", "30000000000"))
+            orderedJson.put("CardBrand", jsonObject.optString("CardBrand", "AX"))
+            orderedJson.put("RealDate", jsonObject.optString("RealDate", "2023-12-28 22:35:12"))
+            orderedJson.put("EmployeeId", jsonObject.optInt("EmployeeId", 1))
+            orderedJson.put("Tip", jsonObject.optInt("Tip", 1500))
+            orderedJson.put("SaleType", jsonObject.optInt("SaleType", 1))
+            orderedJson.put("PosMode", jsonObject.optInt("PosMode", 1))
+            orderedJson.put("Cashback", jsonObject.optInt("Cashback", 1000))
+
+            val jsonFormatted = orderedJson.toString(2)
 
             currentDialog = android.app.AlertDialog.Builder(activity)
                 .setTitle(status)
@@ -483,7 +517,9 @@ object JsonParser {
                 .setPositiveButton("ACEPTAR") { dialog, _ ->
                     dialog.dismiss()
                     currentDialog = null
-                }.setOnDismissListener {
+                    activity.finish()
+                }
+                .setOnDismissListener {
                     currentDialog = null
                 }
                 .setCancelable(false)
@@ -496,42 +532,355 @@ object JsonParser {
     }
 
     /**
-     * Parsea respuesta de duplicado
+     * Parsea respuesta de duplicado y retorna el status y el JSONObject
      */
-    private fun parseDuplicadoResponse(data: Intent?): Pair<String, String> {
+    private fun parseDuplicadoResponseDetailed(data: Intent?): Pair<String, JSONObject> {
         val extras = data?.extras ?: Bundle()
+        var jsonObject = JSONObject()
 
         if (extras.containsKey("response")) {
             val response = extras.getSerializable("response")
             if (response != null) {
-                val jsonObject = JSONObject(response.toString())
-                val status = determineDuplicadoStatus(jsonObject)
-                return Pair(status, jsonObject.toString(2))
+                jsonObject = JSONObject(response.toString())
             }
-        }
-
-        if (extras.containsKey("params")) {
+        } else if (extras.containsKey("params")) {
             val jsonString = extras.getString("params", "")
             if (jsonString.isNotEmpty()) {
-                val jsonObject = JSONObject(jsonString)
-                val status = determineDuplicadoStatus(jsonObject)
-                return Pair(status, jsonObject.toString(2))
+                jsonObject = JSONObject(jsonString)
             }
         }
 
-        return Pair("⚠️ RESPUESTA DESCONOCIDA", "{}")
+        val status = determineDuplicadoStatusDetailed(jsonObject)
+        return Pair(status, jsonObject)
     }
 
     /**
      * Determina estado del duplicado
      */
-    private fun determineDuplicadoStatus(jsonObject: JSONObject): String {
+    private fun determineDuplicadoStatusDetailed(jsonObject: JSONObject): String {
         val responseCode = jsonObject.optString("ResponseCode", "-1")
+        val responseMessage = jsonObject.optString("ResponseMessage", "")
         val success = jsonObject.optBoolean("Success", false)
 
         return when {
-            success || responseCode == "0" || responseCode == "00" -> "✅ DUPLICADO APROBADO"
-            else -> "⚠️ DUPLICADO RECHAZADO"
+            success || responseCode == "0" || responseCode == "00" -> "DUPLICADO APROBADO"
+            responseCode == "-1" && responseMessage.isNotEmpty() -> "DUPLICADO RECHAZADO - $responseMessage"
+            responseCode == "-1" -> "DUPLICADO RECHAZADO"
+            else -> "DUPLICADO RECHAZADO (Codigo: $responseCode)"
+        }
+    }
+    /**
+     * Procesa y muestra la respuesta de detalle de venta en un diálogo
+     */
+    fun showDetalleVentaResult(activity: android.app.Activity, data: Intent?) {
+        currentDialog?.dismiss()
+        try {
+            val (status, jsonFormatted) = parseDetalleVentaResponse(data)
+
+            currentDialog = android.app.AlertDialog.Builder(activity)
+                .setTitle(status)
+                .setMessage(jsonFormatted)
+                .setPositiveButton("ACEPTAR") { dialog, _ ->
+                    dialog.dismiss()
+                    currentDialog = null
+                    activity.finish()
+                }
+                .setOnDismissListener {
+                    currentDialog = null
+                }
+                .setCancelable(false)
+                .show()
+
+        } catch (e: Exception) {
+            currentDialog = null
+            showErrorDialog(activity, "Error: ${e.message}", data?.extras?.toString())
+        }
+    }
+
+    /**
+     * Parsea respuesta de detalle de venta
+     */
+    private fun parseDetalleVentaResponse(data: Intent?): Pair<String, String> {
+        val extras = data?.extras ?: Bundle()
+
+        // Caso 1: JSON viene en el campo "response"
+        if (extras.containsKey("response")) {
+            val response = extras.getSerializable("response")
+            if (response != null) {
+                val jsonObject = JSONObject(response.toString())
+                val status = determineDetalleVentaStatus(jsonObject)
+                val formattedJson = jsonObject.toString(2)
+                return Pair(status, formattedJson)
+            }
+        }
+
+        // Caso 2: JSON viene en el campo "params"
+        if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                val jsonObject = JSONObject(jsonString)
+                val status = determineDetalleVentaStatus(jsonObject)
+                val formattedJson = jsonObject.toString(2)
+                return Pair(status, formattedJson)
+            }
+        }
+
+        // Caso 3: Error
+        if (extras.containsKey("error")) {
+            val error = extras.getString("error", "Error desconocido")
+            val jsonObject = JSONObject().apply {
+                put("FunctionCode", 105)
+                put("ResponseCode", -1)
+                put("ResponseMessage", error)
+            }
+            return Pair("DETALLE DE VENTA FALLIDO", jsonObject.toString(2))
+        }
+
+        return Pair("RESPUESTA DESCONOCIDA", "{}")
+    }
+
+    /**
+     * Determina estado del detalle de venta
+     */
+    private fun determineDetalleVentaStatus(jsonObject: JSONObject): String {
+        val responseCode = jsonObject.optString("ResponseCode", "-1")
+        val responseMessage = jsonObject.optString("ResponseMessage", "")
+
+        return when {
+            responseCode == "0" || responseCode == "00" ||
+                    responseMessage.contains("Aprobado", ignoreCase = true) -> "DETALLE DE VENTA EXITOSO"
+            jsonObject.has("error") -> "ERROR EN DETALLE DE VENTA"
+            else -> "DETALLE DE VENTA RECHAZADO"
+        }
+    }
+
+    /**
+     * Procesa y muestra la respuesta de cierre en un diálogo (versión completa)
+     */
+    fun showCierreResultCompleto(activity: android.app.Activity, data: Intent?) {
+        currentDialog?.dismiss()
+        try {
+            val extras = data?.extras ?: Bundle()
+            val response = extras.getSerializable("response")
+
+            if (response != null) {
+                val jsonObject = JSONObject(response.toString())
+                val success = jsonObject.optBoolean("Success", false)
+                val responseCode = jsonObject.optString("ResponseCode", "-1")
+                val responseMessage = jsonObject.optString("ResponseMessage", "")
+                val commerceCode = jsonObject.optLong("CommerceCode", 0)
+                val terminalId = jsonObject.optString("TerminalId", "")
+
+                // Construir mensaje formateado
+                val mensaje = StringBuilder()
+                mensaje.appendLine(if (success) "CIERRE EXITOSO" else "CIERRE FALLIDO")
+                mensaje.appendLine()
+                mensaje.appendLine("DATOS DEL CIERRE:")
+                mensaje.appendLine("• Código: $responseCode")
+                mensaje.appendLine("• Mensaje: $responseMessage")
+                mensaje.appendLine("• Comercio: $commerceCode")
+                mensaje.appendLine("• Terminal: $terminalId")
+
+                // Si hay SaleDetails y NO está vacío, mostrar resumen
+                if (jsonObject.has("SaleDetails")) {
+                    val saleDetails = jsonObject.getJSONArray("SaleDetails")
+                    if (saleDetails.length() > 0) {
+                        mensaje.appendLine()
+                        mensaje.appendLine("VENTAS DEL DÍA: ${saleDetails.length()}")
+
+                        // Calcular total
+                        var total = 0L
+                        for (i in 0 until saleDetails.length()) {
+                            val venta = saleDetails.getJSONObject(i)
+                            total += venta.optLong("Amount", 0)
+                        }
+                        mensaje.appendLine("Total: $$total")
+                    } else {
+                        mensaje.appendLine()
+                        mensaje.appendLine("Sin detalle de ventas (impresión no solicitada)")
+                    }
+                }
+
+                mensaje.appendLine()
+                mensaje.appendLine("JSON COMPLETO:")
+                mensaje.appendLine(jsonObject.toString(2))
+
+                currentDialog = android.app.AlertDialog.Builder(activity)
+                    .setTitle("Resultado de Cierre")
+                    .setMessage(mensaje.toString())
+                    .setPositiveButton("ACEPTAR") { dialog, _ ->
+                        dialog.dismiss()
+                        currentDialog = null
+                        activity.finish()
+                    }
+                    .setOnDismissListener {
+                        currentDialog = null
+                    }
+                    .setCancelable(false)
+                    .show()
+            } else {
+                showCierreResult(activity, data)
+            }
+
+        } catch (e: Exception) {
+            currentDialog = null
+            showCierreResult(activity, data)
+        }
+    }
+
+    /**
+     * Procesa y muestra la respuesta de impresión en un diálogo
+     */
+    fun showPrintServiceResult(activity: android.app.Activity, data: Intent?) {
+        currentDialog?.dismiss()
+        try {
+            val resultData = data?.getStringExtra("resultData") ?: "{}"
+            val formattedJson = formatJson(resultData)
+
+            currentDialog = android.app.AlertDialog.Builder(activity)
+                .setTitle("Resultado Impresión")
+                .setMessage(formattedJson)
+                .setPositiveButton("ACEPTAR") { dialog, _ ->
+                    dialog.dismiss()
+                    currentDialog = null
+                    activity.finish()
+                }
+                .setOnDismissListener { currentDialog = null }
+                .setCancelable(false)
+                .show()
+
+        } catch (e: Exception) {
+            currentDialog = null
+            showErrorDialog(activity, "Error: ${e.message}", data?.extras?.toString())
+        }
+    }
+
+    private fun formatJson(jsonString: String): String {
+        return try {
+            val jsonObject = JSONObject(jsonString)
+            jsonObject.toString(4)
+        } catch (e: Exception) {
+            jsonString
+        }
+    }
+
+    /**
+     * Parsea respuesta de impresión
+     */
+    private fun parsePrintServiceResponse(data: Intent?): Pair<String, String> {
+        val extras = data?.extras ?: Bundle()
+
+        // Caso 1: JSON viene en el campo "response"
+        if (extras.containsKey("response")) {
+            val response = extras.getSerializable("response")
+            if (response != null) {
+                val jsonObject = JSONObject(response.toString())
+                val status = determinePrintServiceStatus(jsonObject)
+                val formattedJson = jsonObject.toString(2)
+                return Pair(status, formattedJson)
+            }
+        }
+
+        // Caso 2: JSON viene en el campo "params"
+        if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                val jsonObject = JSONObject(jsonString)
+                val status = determinePrintServiceStatus(jsonObject)
+                val formattedJson = jsonObject.toString(2)
+                return Pair(status, formattedJson)
+            }
+        }
+
+        // Caso 3: Error
+        if (extras.containsKey("error")) {
+            val error = extras.getString("error", "Error desconocido")
+            val jsonObject = JSONObject().apply {
+                put("FunctionCode", 117)
+                put("ResponseCode", -1)
+                put("ResponseMessage", error)
+            }
+            return Pair("IMPRESIÓN FALLIDA", jsonObject.toString(2))
+        }
+
+        return Pair("RESPUESTA DESCONOCIDA", "{}")
+    }
+
+    /**
+     * Determina estado de la impresión
+     */
+    private fun determinePrintServiceStatus(jsonObject: JSONObject): String {
+        val responseCode = jsonObject.optString("ResponseCode", "-1")
+        val responseMessage = jsonObject.optString("ResponseMessage", "")
+
+        return when {
+            responseCode == "0" || responseCode == "00" -> "IMPRESIÓN EXITOSA"
+            responseMessage.contains("Impresión OK", ignoreCase = true) -> "IMPRESIÓN EXITOSA"
+            jsonObject.has("error") -> "ERROR DE IMPRESIÓN"
+            else -> "IMPRESIÓN RECHAZADA"
+        }
+    }
+
+    /**
+     * Procesa y muestra la respuesta de devolución con formato detallado
+     */
+    fun showDevolucionResultFormatted(activity: android.app.Activity, data: Intent?) {
+        currentDialog?.dismiss()
+        try {
+            val extras = data?.extras ?: Bundle()
+            val response = extras.getSerializable("response")
+
+            if (response != null) {
+                val jsonObject = JSONObject(response.toString())
+
+                val functionCode = jsonObject.optInt("FunctionCode", 108)
+                val responseCode = jsonObject.optString("ResponseCode", "-1")
+                val responseMessage = jsonObject.optString("ResponseMessage", "")
+                val commerceCode = jsonObject.optLong("CommerceCode", 0)
+                val terminalId = jsonObject.optString("TerminalId", "")
+                val authorizationCode = jsonObject.optString("AuthorizationCode", "")
+                val operationId = jsonObject.optInt("OperationID", 0)
+                val dateTime = jsonObject.optString("DateTime", "")
+                val last4Digits = jsonObject.optString("Last4Digits", "")
+                val commerceName = jsonObject.optString("CommerceName", "")
+
+                val mensaje = StringBuilder()
+                mensaje.appendLine(if (responseCode == "0") "DEVOLUCIÓN APROBADA" else "DEVOLUCIÓN RECHAZADA")
+                mensaje.appendLine()
+                mensaje.appendLine("DETALLE DE LA DEVOLUCIÓN:")
+                mensaje.appendLine("• Código: $responseCode")
+                mensaje.appendLine("• Mensaje: $responseMessage")
+                mensaje.appendLine("• Autorización: $authorizationCode")
+                mensaje.appendLine("• Operación: $operationId")
+                mensaje.appendLine("• Comercio: $commerceName")
+                mensaje.appendLine("• Código Comercio: $commerceCode")
+                mensaje.appendLine("• Terminal: $terminalId")
+                mensaje.appendLine("• Últimos 4 dígitos: $last4Digits")
+                mensaje.appendLine("• Fecha: $dateTime")
+                mensaje.appendLine()
+                mensaje.appendLine("JSON COMPLETO:")
+                mensaje.appendLine(jsonObject.toString(2))
+
+                currentDialog = android.app.AlertDialog.Builder(activity)
+                    .setTitle("Resultado de Devolución")
+                    .setMessage(mensaje.toString())
+                    .setPositiveButton("ACEPTAR") { dialog, _ ->
+                        dialog.dismiss()
+                        currentDialog = null
+                        activity.finish()
+                    }
+                    .setOnDismissListener {
+                        currentDialog = null
+                    }
+                    .setCancelable(false)
+                    .show()
+            } else {
+                showDevolucionResult(activity, data)
+            }
+
+        } catch (e: Exception) {
+            currentDialog = null
+            showDevolucionResult(activity, data)
         }
     }
 }

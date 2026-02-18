@@ -3,11 +3,11 @@ package cl.ione.simuladorapptoapp.components
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.LinearLayout
 import cl.ione.simuladorapptoapp.R
 import cl.ione.simuladorapptoapp.databinding.ComponentFooterButtonsBinding
-import com.google.android.material.button.MaterialButton
 
 class FooterButtons @JvmOverloads constructor(
     context: Context,
@@ -20,17 +20,13 @@ class FooterButtons @JvmOverloads constructor(
     private var onSecondaryClickListener: (() -> Unit)? = null
 
     init {
-        // Inflar el layout
         binding = ComponentFooterButtonsBinding.inflate(
             LayoutInflater.from(context),
             this,
             true
         )
 
-        // Configurar atributos personalizados
         setupAttributes(attrs)
-
-        // Configurar listeners por defecto
         setupListeners()
     }
 
@@ -41,11 +37,9 @@ class FooterButtons @JvmOverloads constructor(
                 R.styleable.FooterButtons
             )
 
-            // Obtener textos desde XML
             val primaryText = typedArray.getString(R.styleable.FooterButtons_primaryText)
             val secondaryText = typedArray.getString(R.styleable.FooterButtons_secondaryText)
 
-            // Configurar botones si tienen texto
             setPrimaryButton(primaryText)
             setSecondaryButton(secondaryText)
 
@@ -55,15 +49,24 @@ class FooterButtons @JvmOverloads constructor(
 
     private fun setupListeners() {
         binding.btnPrimary.setOnClickListener {
+            hideKeyboard()
             onPrimaryClickListener?.invoke()
         }
 
         binding.btnSecondary.setOnClickListener {
+            hideKeyboard()
             onSecondaryClickListener?.invoke()
         }
     }
 
-    // Función para configurar solo un botón
+    /**
+     * Cierra el teclado virtual
+     */
+    private fun hideKeyboard() {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(windowToken, 0)
+    }
+
     fun setSingleButton(
         text: String,
         isPrimary: Boolean = true,
@@ -78,28 +81,24 @@ class FooterButtons @JvmOverloads constructor(
         }
     }
 
-    // Función para configurar dos botones
     fun setButtons(
         primaryText: String? = null,
         secondaryText: String? = null,
         onPrimaryClick: (() -> Unit)? = null,
         onSecondaryClick: (() -> Unit)? = null
     ) {
-        // Configurar botón primario
         if (primaryText != null) {
             setPrimaryButton(primaryText, onPrimaryClick)
         } else {
             binding.btnPrimary.visibility = GONE
         }
 
-        // Configurar botón secundario
         if (secondaryText != null) {
             setSecondaryButton(secondaryText, onSecondaryClick)
         } else {
             binding.btnSecondary.visibility = GONE
         }
 
-        // Ajustar layout si solo hay un botón
         adjustLayoutForSingleButton()
     }
 
@@ -140,14 +139,12 @@ class FooterButtons @JvmOverloads constructor(
         val secondaryVisible = binding.btnSecondary.visibility == VISIBLE
 
         if (primaryVisible && !secondaryVisible) {
-            // Solo botón primario visible
             binding.btnPrimary.layoutParams = (binding.btnPrimary.layoutParams as LayoutParams).apply {
                 weight = 0f
                 width = LayoutParams.WRAP_CONTENT
                 marginEnd = 0
             }
         } else if (!primaryVisible && secondaryVisible) {
-            // Solo botón secundario visible
             binding.btnSecondary.layoutParams = (binding.btnSecondary.layoutParams as LayoutParams).apply {
                 weight = 0f
                 width = LayoutParams.WRAP_CONTENT
@@ -155,11 +152,9 @@ class FooterButtons @JvmOverloads constructor(
         }
     }
 
-    // Métodos para obtener referencias a los botones si necesitas personalizarlos más
     fun getPrimaryButton(): androidx.appcompat.widget.AppCompatButton = binding.btnPrimary
     fun getSecondaryButton(): Button = binding.btnSecondary
 
-    // Método para cambiar colores dinámicamente
     fun setPrimaryButtonStyle(
         textColor: Int = R.color.primary_red,
         strokeColor: Int = R.color.primary_red,

@@ -84,7 +84,6 @@
                             android:id="@+id/etOperationId"
                             android:layout_width="match_parent"
                             android:layout_height="56dp"
-                            android:hint=""
                             android:inputType="number"
                             android:maxLength="20"
                             android:textSize="16sp"
@@ -141,7 +140,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background_main"
         android:orientation="vertical"
         android:padding="8dp">
 

@@ -16,8 +16,8 @@ android {
         applicationId = "cl.ione.simuladorapptoapp"
         minSdk = 26
         targetSdk = 34
-        versionCode = 99
-        versionName = "99.0"
+        versionCode = 2
+        versionName = "99.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

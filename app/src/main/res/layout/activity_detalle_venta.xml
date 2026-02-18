@@ -47,7 +47,7 @@
                 android:layout_height="140dp"
                 android:background="@android:color/transparent"
                 android:scaleType="center"
-                android:src="@drawable/terminalcopy" />
+                android:src="@drawable/ventamc" />
 
         </androidx.cardview.widget.CardView>
 
@@ -76,7 +76,6 @@
         android:id="@+id/footerContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background_main"
         android:orientation="vertical"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
