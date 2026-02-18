@@ -11,6 +11,7 @@
         <attr name="title" format="string" />
         <attr name="showBackButton" format="boolean" />
         <attr name="showActionButton" format="boolean" />
+        <attr name="showRequestButton" format="boolean" />
         <attr name="actionIcon" format="reference" />
         <attr name="backgroundColor" format="color" />
         <attr name="textColor" format="color" />

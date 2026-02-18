@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import cl.getnet.payment.interop.parcels.SalesdetailRequest
 import cl.ione.simuladorapptoapp.databinding.ActivityDetalleVentaBinding
 import cl.ione.simuladorapptoapp.components.JsonParser
+import cl.ione.simuladorapptoapp.components.RequestDialog
+import org.json.JSONObject
 
 class DetalleVentaActivity : AppCompatActivity() {
 
@@ -17,6 +19,7 @@ class DetalleVentaActivity : AppCompatActivity() {
  private var isCommandsMode: Boolean = false
  private var printOnPos: Boolean = true
  private var typeApp: Byte = 0
+ private var currentRequestJson: String = "" // Para guardar el request actual
 
  override fun onCreate(savedInstanceState: Bundle?) {
   super.onCreate(savedInstanceState)
@@ -27,6 +30,8 @@ class DetalleVentaActivity : AppCompatActivity() {
   obtenerDatosIntent()
   configurarHeader()
   configurarListeners()
+  configurarActualizacionRequest() // Configurar actualización automática
+  actualizarRequestJson() // Generar request inicial
  }
 
  private fun obtenerDatosIntent() {
@@ -38,10 +43,20 @@ class DetalleVentaActivity : AppCompatActivity() {
 
  private fun configurarHeader() {
   val titulo = if (isCommandsMode) "Detalle JSON" else "Detalle de Venta"
+
   binding.header.setup(
    title = titulo,
    showBackButton = true,
-   onBackClick = { finish() }
+   showRequestButton = true, // Mostrar botón de request
+   onBackClick = { finish() },
+   onRequestClick = {
+    // Mostrar el request actual
+    if (currentRequestJson.isNotEmpty()) {
+     binding.header.showRequestJson(currentRequestJson, "REQUEST DETALLE")
+    } else {
+     Toast.makeText(this, "No hay request para mostrar", Toast.LENGTH_SHORT).show()
+    }
+   }
   )
  }
 
@@ -55,6 +70,35 @@ class DetalleVentaActivity : AppCompatActivity() {
 
   binding.btnIniciarVenta.setOnClickListener {
    iniciarDetalleVenta()
+  }
+ }
+
+ // Configurar actualización automática (aunque no hay campos editables, igual generamos el JSON)
+ private fun configurarActualizacionRequest() {
+  // Como no hay campos editables, solo necesitamos actualizar cuando cambien las variables
+  // pero como vienen del intent, no cambian
+ }
+
+ // Actualizar el JSON del request con los valores actuales
+ private fun actualizarRequestJson() {
+  try {
+   val jsonObject = if (isCommandsMode) {
+    JSONObject().apply {
+     put("PrintOnPos", printOnPos)
+     put("TypeApp", typeApp)
+    }
+   } else {
+    JSONObject().apply {
+     put("PrintOnPos", printOnPos)
+     put("TypeApp", typeApp)
+     put("originRequestApp", 1)
+    }
+   }
+
+   currentRequestJson = jsonObject.toString(4)
+
+  } catch (e: Exception) {
+   currentRequestJson = "{\"error\": \"Error generando request: ${e.message}\"}"
   }
  }
 
@@ -83,6 +127,8 @@ class DetalleVentaActivity : AppCompatActivity() {
    val actividades = packageManager.queryIntentActivities(intent, 0)
    if (actividades.isNotEmpty()) {
     startActivityForResult(intent, REQUEST_CODE_DETALLE)
+    // Actualizar request después de enviar
+    actualizarRequestJson()
    } else {
     Toast.makeText(this,
      "Getnet no está disponible en este dispositivo",

@@ -3,16 +3,11 @@ package cl.ione.simuladorapptoapp
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import cl.getnet.payment.interop.parcels.SaleRequest
-import cl.ione.simuladorapptoapp.components.FooterButtons
-import cl.ione.simuladorapptoapp.components.Header
-import cl.ione.simuladorapptoapp.components.JsonParser
-import cl.ione.simuladorapptoapp.components.setupMoneyFormat
-import cl.ione.simuladorapptoapp.components.getCleanMoneyValue
-import cl.ione.simuladorapptoapp.components.setMoneyValue
+import cl.ione.simuladorapptoapp.components.*
+import org.json.JSONObject
 
 class VentaActivity : AppCompatActivity() {
 
@@ -38,6 +33,7 @@ class VentaActivity : AppCompatActivity() {
         setupSpinners()
         setupFooterButtons()
         setDefaultValues()
+        setupRequestManager() // ¡Solo esto necesitamos!
     }
 
     private fun initViews() {
@@ -52,22 +48,84 @@ class VentaActivity : AppCompatActivity() {
     }
 
     private fun setupHeader() {
-        val titulo = if (isCommandsMode) {
-            "Venta JSON"
-        } else {
-            "Venta"
-        }
-        header.setTitle(titulo)
+        val titulo = if (isCommandsMode) "Venta JSON" else "Venta"
+        header.setup(
+            title = titulo,
+            showBackButton = true,
+            showRequestButton = true,
+            onBackClick = { finish() }
+            // ¡No necesitamos onRequestClick aquí!
+        )
+    }
 
-        header.setOnBackClickListener {
-            finish()
+    // 🎯 TODO EL MÁGICO REQUEST MANAGER EN UNA SOLA FUNCIÓN
+    private fun setupRequestManager() {
+        // 1. Vincular el header con RequestManager
+        RequestManager.bind(header)
+
+        // 2. Función que genera el JSON con los valores actuales
+        val buildRequestJson = {
+            val amount = etAmount.getCleanMoneyValue()
+            val ticketNumber = etTicketNumber.text.toString()
+            val printOnPos = rgPrintOnPos.checkedRadioButtonId == R.id.rbPrintYes
+            val saleType = spinnerSaleType.selectedItemPosition + 1
+            val employeeId = etEmployeeId.text.toString().toIntOrNull() ?: 1
+
+            if (isCommandsMode) {
+                JSONObject().apply {
+                    put("Amount", amount)
+                    put("TicketNumber", ticketNumber)
+                    put("PrintOnPos", printOnPos)
+                    put("SaleType", saleType)
+                    put("EmployeeId", employeeId)
+                    put("TypeApp", 0)
+                    put("RestrictedCards", listOf("12345678", "12345679", "12345670"))
+                    put("AllowedCards", listOf("87654321", "87654322", "87654323"))
+                    put("PlaceCardToPayTimeout", 20)
+                    put("PaymentResultTimeout", 2)
+                }
+            } else {
+                JSONObject().apply {
+                    put("Amount", amount)
+                    put("TicketNumber", ticketNumber)
+                    put("PrintOnPos", printOnPos)
+                    put("SaleType", saleType)
+                    put("EmployeeId", employeeId)
+                    put("TypeApp", 0)
+                    put("tcBsan", true)
+                    put("tdBsan", true)
+                }
+            }
         }
+
+        // 3. Vincular todos los campos automáticamente
+        val titulo = if (isCommandsMode) "Venta JSON" else "Venta (Librería)"
+
+        // Bind EditTexts
+        RequestManager.bindEditText(etAmount, etTicketNumber, etEmployeeId,
+            updateFunction = buildRequestJson,
+            title = titulo
+        )
+
+        // Bind RadioGroup
+        RequestManager.bindRadioGroup(rgPrintOnPos,
+            updateFunction = buildRequestJson,
+            title = titulo
+        )
+
+        // Bind Spinner
+        RequestManager.bindSpinner(spinnerSaleType,
+            updateFunction = buildRequestJson,
+            title = titulo
+        )
+
+        // 4. Inicializar con valores por defecto
+        RequestManager.initWithDefault(buildRequestJson, titulo)
     }
 
     private fun setDefaultValues() {
         val monto = generarMontoPsicologico()
         etAmount.setMoneyValue(monto.toLong())
-
         etTicketNumber.setText("${System.currentTimeMillis() % 100000}")
         etEmployeeId.setText("1")
     }
@@ -104,18 +162,6 @@ class VentaActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSaleType.adapter = adapter
         spinnerSaleType.setSelection(0)
-
-        spinnerSaleType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
     }
 
     private fun setupFooterButtons() {
@@ -138,7 +184,6 @@ class VentaActivity : AppCompatActivity() {
             val employeeId = etEmployeeId.text.toString().toInt()
 
             val intent = Intent("cl.getnet.payment.action.SALE")
-
 
             if (isCommandsMode) {
                 val saleRequestJson = """
@@ -233,7 +278,7 @@ class VentaActivity : AppCompatActivity() {
         if (requestCode == REQUEST_CODE) {
             when (resultCode) {
                 RESULT_OK -> {
-                    procesarRespuestaExitosa(data)
+                    JsonParser.showVentaResult(this, data, isCommandsMode)
                 }
                 RESULT_CANCELED -> {
                     mostrarResultado("VENTA CANCELADA\n\nEl usuario canceló la transacción")
@@ -243,10 +288,6 @@ class VentaActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun procesarRespuestaExitosa(data: Intent?) {
-        JsonParser.showVentaResult(this, data)
     }
 
     private fun procesarRespuestaError(data: Intent?) {

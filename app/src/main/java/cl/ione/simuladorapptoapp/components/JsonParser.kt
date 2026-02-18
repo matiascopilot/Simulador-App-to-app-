@@ -8,15 +8,25 @@ object JsonParser {
     private var currentDialog: android.app.AlertDialog? = null
 
     /**
-     * Procesa y muestra la respuesta de venta en un diálogo
-     * Uso: JsonParser.showVentaResult(activity, data)
+     * Procesa y muestra la respuesta de venta en un diálogo con formato ordenado
+     * Soporta ambos modos: librería (isCommandsMode = false) y JSON (isCommandsMode = true)
      */
-    fun showVentaResult(activity: android.app.Activity, data: Intent?) {
+    fun showVentaResult(activity: android.app.Activity, data: Intent?, isCommandsMode: Boolean = false) {
         currentDialog?.dismiss()
         try {
-            val (status, jsonFormatted) = parseVentaResponse(data)
+            val (status, jsonObject) = parseVentaResponseDetailed(data)
 
-            // Mostrar diálogo
+            // Crear JSON ordenado según el modo
+            val orderedJson = if (isCommandsMode) {
+                // MODO JSON - Formato completo con todos los campos
+                createJsonModeJson(jsonObject)
+            } else {
+                // MODO LIBRERÍA - Formato básico de la librería
+                createLibreriaModeJson(jsonObject)
+            }
+
+            val jsonFormatted = orderedJson.toString(2)
+
             currentDialog = android.app.AlertDialog.Builder(activity)
                 .setTitle(status)
                 .setMessage(jsonFormatted)
@@ -24,7 +34,8 @@ object JsonParser {
                     dialog.dismiss()
                     currentDialog = null
                     activity.finish()
-                }.setOnDismissListener {
+                }
+                .setOnDismissListener {
                     currentDialog = null
                 }
                 .setCancelable(false)
@@ -33,6 +44,149 @@ object JsonParser {
         } catch (e: Exception) {
             currentDialog = null
             showErrorDialog(activity, "Error: ${e.message}", data?.extras?.toString())
+        }
+    }
+
+    /**
+     * Crea JSON para modo LIBRERÍA (formato básico)
+     */
+    private fun createLibreriaModeJson(jsonObject: JSONObject): JSONObject {
+        val orderedJson = JSONObject()
+
+        // Campos básicos de la librería
+        orderedJson.put("FunctionCode", jsonObject.optInt("FunctionCode", 100))
+        orderedJson.put("ResponseCode", jsonObject.optString("ResponseCode", "0"))
+        orderedJson.put("ResponseMessage", jsonObject.optString("ResponseMessage", "Aprobado"))
+        orderedJson.put("CommerceCode", jsonObject.optLong("CommerceCode", 550062700310))
+        orderedJson.put("TerminalId", jsonObject.optString("TerminalId", "ABC1234C"))
+        orderedJson.put("Ticket", jsonObject.optString("Ticket", "ABC123"))
+        orderedJson.put("AuthorizationCode", jsonObject.optString("AuthorizationCode", "XZ123456"))
+        orderedJson.put("Amount", jsonObject.optInt("Amount", 15000))
+        orderedJson.put("SharesNumber", jsonObject.optInt("SharesNumber", 3))
+        orderedJson.put("SharesAmount", jsonObject.optInt("SharesAmount", 5000))
+        orderedJson.put("Last4Digits", jsonObject.optInt("Last4Digits", 6677))
+        orderedJson.put("OperationId", jsonObject.optInt("OperationId", 60))
+        orderedJson.put("CardType", jsonObject.optString("CardType", "CR"))
+        orderedJson.put("AccountingDate", jsonObject.optString("AccountingDate", "2023-12-28 22:35:12"))
+        orderedJson.put("AccountNumber", jsonObject.optString("AccountNumber", "30000000000"))
+        orderedJson.put("CardBrand", jsonObject.optString("CardBrand", "AX"))
+        orderedJson.put("RealDate", jsonObject.optString("RealDate", "2023-12-28 22:35:12"))
+        orderedJson.put("EmployeeId", jsonObject.optInt("EmployeeId", 1))
+        orderedJson.put("Tip", jsonObject.optInt("Tip", 1500))
+        orderedJson.put("SaleType", jsonObject.optInt("SaleType", 0))  // Por defecto 0 en librería
+        orderedJson.put("PosMode", jsonObject.optInt("PosMode", 1))
+        orderedJson.put("Cashback", jsonObject.optInt("Cashback", 1000))
+
+        return orderedJson
+    }
+
+    /**
+     * Crea JSON para modo COMMANDS (formato completo con todos los campos)
+     */
+    private fun createJsonModeJson(jsonObject: JSONObject): JSONObject {
+        val orderedJson = JSONObject()
+
+        // Campos base
+        orderedJson.put("FunctionCode", jsonObject.optInt("FunctionCode", 100))
+        orderedJson.put("ResponseCode", jsonObject.optString("ResponseCode", "0"))
+        orderedJson.put("ResponseMessage", jsonObject.optString("ResponseMessage", "Aprobado"))
+        orderedJson.put("CommerceCode", jsonObject.optLong("CommerceCode", 550062700310))
+        orderedJson.put("TerminalId", jsonObject.optString("TerminalId", "ABC1234C"))
+        orderedJson.put("Ticket", jsonObject.optString("Ticket", "123456789012345678901234"))
+        orderedJson.put("AuthorizationCode", jsonObject.optString("AuthorizationCode", "XZ123456"))
+        orderedJson.put("Amount", jsonObject.optInt("Amount", 15000))
+        orderedJson.put("SharesNumber", jsonObject.optInt("SharesNumber", 3))
+        orderedJson.put("SharesAmount", jsonObject.optInt("SharesAmount", 5000))
+        orderedJson.put("Last4Digits", jsonObject.optInt("Last4Digits", 6677))
+        orderedJson.put("OperationId", jsonObject.optInt("OperationId", 60))
+        orderedJson.put("CardType", jsonObject.optString("CardType", "CR"))
+        orderedJson.put("AccountingDate", jsonObject.optString("AccountingDate", "2023-12-28 22:35:12"))
+        orderedJson.put("AccountNumber", jsonObject.optString("AccountNumber", "30000000000"))
+        orderedJson.put("CardBrand", jsonObject.optString("CardBrand", "AX"))
+        orderedJson.put("RealDate", jsonObject.optString("RealDate", "2023-12-28 22:35:12"))
+        orderedJson.put("EmployeeId", jsonObject.optInt("EmployeeId", 1))
+        orderedJson.put("Tip", jsonObject.optInt("Tip", 1500))
+        orderedJson.put("SaleType", jsonObject.optInt("SaleType", 1))  // Por defecto 1 en JSON
+        orderedJson.put("PosMode", jsonObject.optInt("PosMode", 1))
+        orderedJson.put("Cashback", jsonObject.optInt("Cashback", 1000))
+
+        // Campos adicionales solo en modo JSON
+        orderedJson.putOpt("TransToken", jsonObject.optString("TransToken"))
+        orderedJson.putOpt("ExpiryDate", jsonObject.optString("ExpiryDate"))
+        orderedJson.putOpt("EntryMode", jsonObject.optString("EntryMode"))
+        orderedJson.putOpt("Aid", jsonObject.optString("Aid"))
+        orderedJson.putOpt("CommerceRut", jsonObject.optString("CommerceRut"))
+        orderedJson.putOpt("CommerceName", jsonObject.optString("CommerceName"))
+        orderedJson.putOpt("BranchName", jsonObject.optString("BranchName"))
+        orderedJson.putOpt("BranchAddress", jsonObject.optString("BranchAddress"))
+        orderedJson.putOpt("BranchDistrict", jsonObject.optString("BranchDistrict"))
+        orderedJson.putOpt("Bin", jsonObject.optString("Bin"))
+
+        return orderedJson
+    }
+
+    /**
+     * Parsea respuesta de venta y retorna el status y el JSONObject
+     */
+    private fun parseVentaResponseDetailed(data: Intent?): Pair<String, JSONObject> {
+        val extras = data?.extras ?: Bundle()
+        var jsonObject = JSONObject()
+
+        if (extras.containsKey("response")) {
+            val response = extras.getSerializable("response")
+            if (response != null) {
+                jsonObject = JSONObject(response.toString())
+            }
+        } else if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                jsonObject = JSONObject(jsonString)
+            }
+        } else {
+            jsonObject = buildJsonFromExtras(extras)
+        }
+
+        val status = determineVentaStatusDetailed(jsonObject)
+        return Pair(status, jsonObject)
+    }
+
+    /**
+     * Construye JSON a partir de los extras individuales
+     */
+    private fun buildJsonFromExtras(extras: Bundle): JSONObject {
+        val jsonObject = JSONObject()
+        val keys = extras.keySet()
+
+        for (key in keys) {
+            try {
+                when (val value = extras.get(key)) {
+                    is Int -> jsonObject.put(key, value)
+                    is Long -> jsonObject.put(key, value)
+                    is Double -> jsonObject.put(key, value)
+                    is Boolean -> jsonObject.put(key, value)
+                    is String -> jsonObject.put(key, value)
+                    else -> jsonObject.put(key, value?.toString())
+                }
+            } catch (e: Exception) {
+            }
+        }
+        return jsonObject
+    }
+
+    /**
+     * Determina estado de la venta
+     */
+    private fun determineVentaStatusDetailed(jsonObject: JSONObject): String {
+        val responseCode = jsonObject.optString("ResponseCode", "-1")
+        val responseMessage = jsonObject.optString("ResponseMessage", "")
+        val functionCode = jsonObject.optInt("FunctionCode", -1)
+
+        return when {
+            responseCode == "0" || responseCode == "00" -> "VENTA APROBADA"
+            functionCode == 109 -> "DUPLICADO DE VENTA"
+            responseCode == "-1" && responseMessage.isNotEmpty() -> "VENTA RECHAZADA - $responseMessage"
+            responseCode == "-1" -> "VENTA RECHAZADA"
+            else -> "VENTA RECHAZADA (Código: $responseCode)"
         }
     }
 
@@ -302,7 +456,7 @@ object JsonParser {
         val errorMessage = "$message\n\nDatos recibidos:\n$data"
 
         android.app.AlertDialog.Builder(activity)
-            .setTitle("❌ ERROR")
+            .setTitle("ERROR")
             .setMessage(errorMessage)
             .setPositiveButton("ACEPTAR", null)
             .show()

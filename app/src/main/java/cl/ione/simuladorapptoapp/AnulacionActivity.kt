@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import cl.getnet.payment.interop.parcels.CancellationRequest
 import cl.ione.simuladorapptoapp.databinding.ActivityAnulacionBinding
 import cl.ione.simuladorapptoapp.components.JsonParser
-import cl.getnet.payment.interop.parcels.CancellationRequest
+import cl.ione.simuladorapptoapp.components.RequestDialog
+import org.json.JSONObject
 
 class AnulacionActivity : AppCompatActivity() {
 
@@ -15,6 +17,7 @@ class AnulacionActivity : AppCompatActivity() {
     private val REQUEST_CODE_ANULACION = 3444
     private val TAG = "AnulacionActivity"
     private var isCommandsMode: Boolean = false
+    private var currentRequestJson: String = "" // Para guardar el request actual
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +28,8 @@ class AnulacionActivity : AppCompatActivity() {
 
         configurarHeader()
         configurarListeners()
+        configurarActualizacionRequest() // Configurar actualización automática
+        actualizarRequestJson() // Generar request inicial
     }
 
     private fun configurarHeader() {
@@ -37,7 +42,16 @@ class AnulacionActivity : AppCompatActivity() {
         binding.header.setup(
             title = titulo,
             showBackButton = true,
-            onBackClick = { finish() }
+            showRequestButton = true, // Mostrar botón de request
+            onBackClick = { finish() },
+            onRequestClick = {
+                // Mostrar el request actual
+                if (currentRequestJson.isNotEmpty()) {
+                    binding.header.showRequestJson(currentRequestJson, "REQUEST ANULACIÓN")
+                } else {
+                    Toast.makeText(this, "No hay request para mostrar", Toast.LENGTH_SHORT).show()
+                }
+            }
         )
     }
 
@@ -50,7 +64,55 @@ class AnulacionActivity : AppCompatActivity() {
         )
     }
 
+    // Configurar actualización automática cuando cambian los campos
+    private fun configurarActualizacionRequest() {
+        // TextWatcher para campos de texto
+        val textWatcher = object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                actualizarRequestJson()
+            }
+        }
 
+        binding.etOperationId.addTextChangedListener(textWatcher)
+
+        // Listener para RadioGroup
+        binding.rgPrintOnPos.setOnCheckedChangeListener { _, _ ->
+            actualizarRequestJson()
+        }
+    }
+
+    // Actualizar el JSON del request con los valores actuales
+    private fun actualizarRequestJson() {
+        try {
+            val operationIdString = binding.etOperationId.text.toString()
+            val operationId = operationIdString.toIntOrNull() ?: 0
+            val printOnPos = binding.rgPrintOnPos.checkedRadioButtonId == binding.rbPrintYes.id
+            val typeApp: Byte = 0
+
+            val jsonObject = if (isCommandsMode) {
+                JSONObject().apply {
+                    put("OperationId", operationId)
+                    put("PrintOnPos", printOnPos)
+                    put("TypeApp", typeApp)
+                    put("PlaceCardToPayTimeout", 20)
+                    put("PaymentResultTimeout", 2)
+                }
+            } else {
+                JSONObject().apply {
+                    put("OperationId", operationId)
+                    put("PrintOnPos", printOnPos)
+                    put("TypeApp", typeApp)
+                }
+            }
+
+            currentRequestJson = jsonObject.toString(4)
+
+        } catch (e: Exception) {
+            currentRequestJson = "{\"error\": \"Error generando request: ${e.message}\"}"
+        }
+    }
 
     private fun solicitarAnulacion() {
         try {
@@ -110,6 +172,8 @@ class AnulacionActivity : AppCompatActivity() {
             if (actividades.isNotEmpty()) {
                 Log.d(TAG, "✅ Actividades encontradas: ${actividades.size}")
                 startActivityForResult(intent, REQUEST_CODE_ANULACION)
+                // Actualizar request después de enviar
+                actualizarRequestJson()
             } else {
                 Log.e(TAG, "❌ ERROR: Getnet no está disponible")
                 Toast.makeText(this,

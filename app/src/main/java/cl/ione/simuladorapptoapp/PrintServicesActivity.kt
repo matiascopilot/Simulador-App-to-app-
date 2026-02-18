@@ -18,6 +18,9 @@ import androidx.appcompat.app.AppCompatActivity
 import cl.getnet.payment.interop.parcels.PrintServiceRequest
 import cl.ione.simuladorapptoapp.databinding.ActivityPrintServicesBinding
 import cl.ione.simuladorapptoapp.components.JsonParser
+import cl.ione.simuladorapptoapp.components.RequestDialog
+import org.json.JSONArray
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -28,6 +31,7 @@ class PrintServicesActivity : AppCompatActivity() {
  private val TAG = "PrintServicesActivity"
  private var isCommandsMode: Boolean = false
  private var typeApp: Byte = 0
+ private var currentRequestJson: String = ""
 
  // BroadcastReceiver para recibir la respuesta
  private val mBroadcastReceiver = object : BroadcastReceiver() {
@@ -58,6 +62,7 @@ class PrintServicesActivity : AppCompatActivity() {
   obtenerDatosIntent()
   configurarHeader()
   configurarListeners()
+  actualizarRequestJson() // Generar request inicial
 
   registerReceiver(
    mBroadcastReceiver,
@@ -83,10 +88,20 @@ class PrintServicesActivity : AppCompatActivity() {
 
  private fun configurarHeader() {
   val titulo = if (isCommandsMode) "Servicio de Impresión JSON" else "Servicio de Impresión"
+
   binding.header.setup(
    title = titulo,
    showBackButton = true,
-   onBackClick = { finish() }
+   showRequestButton = true, // Mostrar botón de request
+   onBackClick = { finish() },
+   onRequestClick = {
+    // Mostrar el request actual
+    if (currentRequestJson.isNotEmpty()) {
+     binding.header.showRequestJson(currentRequestJson, "REQUEST IMPRESIÓN")
+    } else {
+     Toast.makeText(this, "No hay request para mostrar", Toast.LENGTH_SHORT).show()
+    }
+   }
   )
  }
 
@@ -100,6 +115,107 @@ class PrintServicesActivity : AppCompatActivity() {
 
   binding.btnIniciarImpresion.setOnClickListener {
    enviarImpresion()
+  }
+ }
+
+ // Actualizar el JSON del request con los valores actuales
+ private fun actualizarRequestJson() {
+  try {
+   val imagenBase64 = obtenerImagenBase64()
+
+   val jsonObject = if (imagenBase64.isEmpty()) {
+    JSONObject().apply {
+     put("printData", JSONArray("""
+                        [
+                            {
+                                "printSeq": 1,
+                                "type": "text",
+                                "encode": "",
+                                "data": "SIMULADOR APP TO APP",
+                                "align": "center"
+                            },
+                            {
+                                "printSeq": 2,
+                                "type": "text",
+                                "encode": "",
+                                "data": "${getCurrentDateTime()}",
+                                "align": "center"
+                            },
+                            {
+                                "printSeq": 3,
+                                "type": "text",
+                                "encode": "",
+                                "data": "----------------------------------------",
+                                "align": "left"
+                            },
+                            {
+                                "printSeq": 4,
+                                "type": "barcode",
+                                "encode": "ean13",
+                                "data": "123456789012",
+                                "align": "center"
+                            }
+                        ]
+                    """.trimIndent())
+     )
+     put("typeApp", typeApp)
+    }
+   } else {
+    JSONObject().apply {
+     put("printData", JSONArray("""
+                        [
+                            {
+                                "printSeq": 1,
+                                "type": "text",
+                                "encode": "",
+                                "data": "SIMULADOR APP TO APP",
+                                "align": "center"
+                            },
+                            {
+                                "printSeq": 2,
+                                "type": "text",
+                                "encode": "",
+                                "data": "${getCurrentDateTime()}",
+                                "align": "center"
+                            },
+                            {
+                                "printSeq": 3,
+                                "type": "text",
+                                "encode": "",
+                                "data": "----------------------------------------",
+                                "align": "left"
+                            },
+                            {
+                                "printSeq": 4,
+                                "type": "image",
+                                "encode": "",
+                                "data": "$imagenBase64",
+                                "align": "center"
+                            },
+                            {
+                                "printSeq": 5,
+                                "type": "text",
+                                "encode": "",
+                                "data": "----------------------------------------",
+                                "align": "center"
+                            },
+                            {
+                                "printSeq": 6,
+                                "type": "text",
+                                "encode": "",
+                                "data": "IMPRESION EXITOSA!",
+                                "align": "center"
+                            }
+                        ]
+                    """.trimIndent()))
+     put("typeApp", typeApp)
+    }
+   }
+
+   currentRequestJson = jsonObject.toString(4)
+
+  } catch (e: Exception) {
+   currentRequestJson = "{\"error\": \"Error generando request: ${e.message}\"}"
   }
  }
 
@@ -331,11 +447,15 @@ class PrintServicesActivity : AppCompatActivity() {
 
    Toast.makeText(this, "Solicitud de impresión enviada", Toast.LENGTH_SHORT).show()
 
+   // Actualizar el request JSON después de enviar (por si cambió)
+   actualizarRequestJson()
+
   } catch (e: Exception) {
    Log.e(TAG, "Error: ${e.message}", e)
    Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
   }
  }
+
  private fun getCurrentDateTime(): String {
   val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
   return dateFormat.format(Date())

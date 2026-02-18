@@ -35,9 +35,12 @@
         android:ellipsize="end"
         android:paddingHorizontal="8dp" />
 
-    <Space
-        android:id="@+id/spaceRight"
+    <ImageButton
+        android:id="@+id/btnRequest"
         android:layout_width="48dp"
-        android:layout_height="48dp" />
+        android:layout_height="48dp"
+        android:background="@drawable/sensation_button"
+        android:src="@drawable/ic_request"
+        android:visibility="visible" />
 
 </LinearLayout>

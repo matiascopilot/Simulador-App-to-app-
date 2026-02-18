@@ -93,8 +93,8 @@
 
                 <RadioButton
                     android:id="@+id/rbPrintYes"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:checked="true"
                     android:text="Sí"
@@ -104,7 +104,7 @@
                 <RadioButton
                     android:id="@+id/rbPrintNo"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="No"
                     android:textColor="?attr/colorOnSurface"

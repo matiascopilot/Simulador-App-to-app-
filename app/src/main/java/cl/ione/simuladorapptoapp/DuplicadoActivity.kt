@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import cl.getnet.payment.interop.parcels.DuplicateRequest
 import cl.ione.simuladorapptoapp.databinding.ActivityDuplicadoBinding
 import cl.ione.simuladorapptoapp.components.JsonParser
-import cl.getnet.payment.interop.parcels.DuplicateRequest
+import cl.ione.simuladorapptoapp.components.RequestDialog
+import org.json.JSONObject
 
 class DuplicadoActivity : AppCompatActivity() {
 
@@ -15,6 +17,7 @@ class DuplicadoActivity : AppCompatActivity() {
  private val REQUEST_CODE_DUPLICADO = 3446
  private val TAG = "DuplicadoActivity"
  private var isCommandsMode: Boolean = false
+ private var currentRequestJson: String = "" // Para guardar el request actual
 
  override fun onCreate(savedInstanceState: Bundle?) {
   super.onCreate(savedInstanceState)
@@ -24,14 +27,26 @@ class DuplicadoActivity : AppCompatActivity() {
   isCommandsMode = intent.getBooleanExtra("isCommandsMode", false)
   configurarHeader()
   configurarListeners()
+  configurarActualizacionRequest() // Configurar actualización automática
+  actualizarRequestJson() // Generar request inicial
  }
 
  private fun configurarHeader() {
   val titulo = if (isCommandsMode) "Duplicado JSON" else "Duplicado"
+
   binding.header.setup(
    title = titulo,
    showBackButton = true,
-   onBackClick = { finish() }
+   showRequestButton = true, // Mostrar botón de request
+   onBackClick = { finish() },
+   onRequestClick = {
+    // Mostrar el request actual
+    if (currentRequestJson.isNotEmpty()) {
+     binding.header.showRequestJson(currentRequestJson, "REQUEST DUPLICADO")
+    } else {
+     Toast.makeText(this, "No hay request para mostrar", Toast.LENGTH_SHORT).show()
+    }
+   }
   )
  }
 
@@ -42,6 +57,54 @@ class DuplicadoActivity : AppCompatActivity() {
    onPrimaryClick = { finish() },
    onSecondaryClick = { solicitarDuplicado() }
   )
+ }
+
+ // Configurar actualización automática cuando cambian los campos
+ private fun configurarActualizacionRequest() {
+  // TextWatcher para campos de texto
+  val textWatcher = object : android.text.TextWatcher {
+   override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+   override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+   override fun afterTextChanged(s: android.text.Editable?) {
+    actualizarRequestJson()
+   }
+  }
+
+  binding.etOperationId.addTextChangedListener(textWatcher)
+
+  // Listener para RadioGroup
+  binding.rgPrintOnPos.setOnCheckedChangeListener { _, _ ->
+   actualizarRequestJson()
+  }
+ }
+
+ // Actualizar el JSON del request con los valores actuales
+ private fun actualizarRequestJson() {
+  try {
+   val operationIdString = binding.etOperationId.text.toString()
+   val operationId = operationIdString.toIntOrNull() ?: 0
+   val printOnPos = binding.rgPrintOnPos.checkedRadioButtonId == binding.rbPrintYes.id
+   val typeApp: Byte = 0
+
+   val jsonObject = if (isCommandsMode) {
+    JSONObject().apply {
+     put("OperationId", operationId)
+     put("PrintOnPos", printOnPos)
+     put("TypeApp", typeApp)
+    }
+   } else {
+    JSONObject().apply {
+     put("OperationId", operationId)
+     put("PrintOnPos", printOnPos)
+     put("TypeApp", typeApp)
+    }
+   }
+
+   currentRequestJson = jsonObject.toString(4)
+
+  } catch (e: Exception) {
+   currentRequestJson = "{\"error\": \"Error generando request: ${e.message}\"}"
+  }
  }
 
  private fun solicitarDuplicado() {
@@ -89,6 +152,8 @@ class DuplicadoActivity : AppCompatActivity() {
    val actividades = packageManager.queryIntentActivities(intent, 0)
    if (actividades.isNotEmpty()) {
     startActivityForResult(intent, REQUEST_CODE_DUPLICADO)
+    // Actualizar request después de enviar
+    actualizarRequestJson()
    } else {
     Toast.makeText(this,
      "Getnet no está disponible en este dispositivo",

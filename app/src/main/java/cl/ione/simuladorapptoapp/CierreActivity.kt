@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import cl.getnet.payment.interop.parcels.CloseRequest
 import cl.ione.simuladorapptoapp.databinding.ActivityCierreBinding
 import cl.ione.simuladorapptoapp.components.JsonParser
-import cl.getnet.payment.interop.parcels.CloseRequest
+import cl.ione.simuladorapptoapp.components.RequestDialog
+import org.json.JSONObject
 
 class CierreActivity : AppCompatActivity() {
 
@@ -15,6 +17,7 @@ class CierreActivity : AppCompatActivity() {
  private val REQUEST_CODE_CIERRE = 3448
  private val TAG = "CierreActivity"
  private var isCommandsMode: Boolean = false
+ private var currentRequestJson: String = "" // Para guardar el request actual
 
  override fun onCreate(savedInstanceState: Bundle?) {
   super.onCreate(savedInstanceState)
@@ -24,14 +27,25 @@ class CierreActivity : AppCompatActivity() {
   isCommandsMode = intent.getBooleanExtra("isCommandsMode", false)
   configurarHeader()
   configurarListeners()
+  actualizarRequestJson() // Generar request inicial
  }
 
  private fun configurarHeader() {
   val titulo = if (isCommandsMode) "Cierre JSON" else "Cierre de Caja"
+
   binding.header.setup(
    title = titulo,
    showBackButton = true,
-   onBackClick = { finish() }
+   showRequestButton = true, // Mostrar botón de request
+   onBackClick = { finish() },
+   onRequestClick = {
+    // Mostrar el request actual
+    if (currentRequestJson.isNotEmpty()) {
+     binding.header.showRequestJson(currentRequestJson, "REQUEST CIERRE")
+    } else {
+     Toast.makeText(this, "No hay request para mostrar", Toast.LENGTH_SHORT).show()
+    }
+   }
   )
  }
 
@@ -42,6 +56,32 @@ class CierreActivity : AppCompatActivity() {
    onPrimaryClick = { finish() },
    onSecondaryClick = { solicitarCierre() }
   )
+ }
+
+ // Actualizar el JSON del request con los valores actuales
+ private fun actualizarRequestJson() {
+  try {
+   val typeApp: Byte = 0
+   val printOnPos: Boolean = true
+
+   val jsonObject = if (isCommandsMode) {
+    JSONObject().apply {
+     put("PrintOnPos", printOnPos)
+     put("TypeApp", typeApp)
+     put("PaymentResultTimeout", 2)
+    }
+   } else {
+    JSONObject().apply {
+     put("TypeApp", typeApp)
+     put("PrintOnPos", printOnPos)
+    }
+   }
+
+   currentRequestJson = jsonObject.toString(4)
+
+  } catch (e: Exception) {
+   currentRequestJson = "{\"error\": \"Error generando request: ${e.message}\"}"
+  }
  }
 
  private fun solicitarCierre() {
@@ -69,6 +109,8 @@ class CierreActivity : AppCompatActivity() {
    val actividades = packageManager.queryIntentActivities(intent, 0)
    if (actividades.isNotEmpty()) {
     startActivityForResult(intent, REQUEST_CODE_CIERRE)
+    // Actualizar request después de enviar
+    actualizarRequestJson()
    } else {
     Toast.makeText(this,
      "Getnet no está disponible en este dispositivo",

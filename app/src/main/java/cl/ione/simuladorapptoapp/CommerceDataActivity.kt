@@ -6,11 +6,14 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import cl.ione.simuladorapptoapp.databinding.ActivityCommerceDataBinding
+import cl.ione.simuladorapptoapp.components.RequestDialog
+import org.json.JSONObject
 
 class CommerceDataActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCommerceDataBinding
     private var isCommandsMode: Boolean = false
+    private var currentRequestJson: String = "" // Para guardar el request actual
 
     private val startVentaMC = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val intent = Intent(this, MainActivity::class.java)
@@ -31,6 +34,8 @@ class CommerceDataActivity : AppCompatActivity() {
         setupHeader()
         setupFooterButtons()
         setDefaultValues()
+        configurarActualizacionRequest() // Configurar actualización automática
+        actualizarRequestJson() // Generar request inicial
     }
 
     private fun setupHeader() {
@@ -43,7 +48,16 @@ class CommerceDataActivity : AppCompatActivity() {
         binding.header.setup(
             title = titulo,
             showBackButton = true,
-            onBackClick = { finish() }
+            showRequestButton = true, // Mostrar botón de request
+            onBackClick = { finish() },
+            onRequestClick = {
+                // Mostrar el request actual
+                if (currentRequestJson.isNotEmpty()) {
+                    binding.header.showRequestJson(currentRequestJson, "REQUEST COMERCIO DATOS")
+                } else {
+                    Toast.makeText(this, "No hay request para mostrar", Toast.LENGTH_SHORT).show()
+                }
+            }
         )
     }
 
@@ -66,6 +80,41 @@ class CommerceDataActivity : AppCompatActivity() {
         binding.etCiudad.setText("Santiago")
         binding.etRazonSocial.setText("Movired")
         binding.etNombreFantasia.setText("Simulador A2A MC")
+    }
+
+    // Configurar actualización automática cuando cambian los campos
+    private fun configurarActualizacionRequest() {
+        val textWatcher = object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                actualizarRequestJson()
+            }
+        }
+
+        binding.etRut.addTextChangedListener(textWatcher)
+        binding.etDireccion.addTextChangedListener(textWatcher)
+        binding.etCiudad.addTextChangedListener(textWatcher)
+        binding.etRazonSocial.addTextChangedListener(textWatcher)
+        binding.etNombreFantasia.addTextChangedListener(textWatcher)
+    }
+
+    // Actualizar el JSON del request con los valores actuales
+    private fun actualizarRequestJson() {
+        try {
+            val jsonObject = JSONObject().apply {
+                put("rut", binding.etRut.text.toString())
+                put("direccion", binding.etDireccion.text.toString())
+                put("ciudad", binding.etCiudad.text.toString())
+                put("razonSocial", binding.etRazonSocial.text.toString())
+                put("nombreDeFantasia", binding.etNombreFantasia.text.toString())
+            }
+
+            currentRequestJson = jsonObject.toString(4)
+
+        } catch (e: Exception) {
+            currentRequestJson = "{\"error\": \"Error generando request: ${e.message}\"}"
+        }
     }
 
     private fun validarCampos(): Boolean {

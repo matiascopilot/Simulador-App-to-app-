@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="@color/white">
+
+    <!-- Contorno del documento (sin relleno) -->
+    <path
+        android:strokeColor="@color/primary_red"
+        android:strokeWidth="1.5"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M14,2H6C4.9,2 4,2.9 4,4V20C4,21.1 4.9,22 6,22H18C19.1,22 20,21.1 20,20V8L14,2Z" />
+
+    <!-- Línea superior del documento (plegado) solo contorno -->
+    <path
+        android:strokeColor="@color/primary_red"
+        android:strokeWidth="1.5"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M13,3V9H19L13,3Z" />
+
+    <!-- Líneas de texto en el documento (3 líneas) -->
+    <path
+        android:strokeColor="@color/primary_red"
+        android:strokeWidth="1.2"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M8,13H16 M8,15H16 M8,17H16 M8,19H16 M8,9H12" />
+</vector>

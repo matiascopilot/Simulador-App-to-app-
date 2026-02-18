@@ -10,14 +10,17 @@ import cl.getnet.payment.interop.parcels.*
 import cl.ione.simuladorapptoapp.components.FooterButtons
 import cl.ione.simuladorapptoapp.components.Header
 import cl.ione.simuladorapptoapp.components.JsonParser
+import cl.ione.simuladorapptoapp.components.RequestDialog
 import cl.ione.simuladorapptoapp.components.setupMoneyFormat
 import cl.ione.simuladorapptoapp.components.getCleanMoneyValue
 import cl.ione.simuladorapptoapp.components.setMoneyValue
+import org.json.JSONObject
 
 class VentaMCActivity : AppCompatActivity() {
 
     private val REQUEST_CODE = 3450
     private var isCommandsMode: Boolean = false
+    private var currentRequestJson: String = "" // Para guardar el request actual
 
     private lateinit var header: Header
     private lateinit var etAmount: EditText
@@ -61,6 +64,8 @@ class VentaMCActivity : AppCompatActivity() {
         setupSpinners()
         setupFooterButtons()
         setDefaultValues()
+        configurarActualizacionRequest() // Configurar actualización automática
+        actualizarRequestJson() // Generar request inicial
     }
 
     private fun initViews() {
@@ -80,8 +85,153 @@ class VentaMCActivity : AppCompatActivity() {
 
     private fun setupHeader() {
         val titulo = if (isCommandsMode) "Venta MC JSON" else "Venta Multicomercio"
-        header.setTitle(titulo)
-        header.setOnBackClickListener { finish() }
+
+        header.setup(
+            title = titulo,
+            showBackButton = true,
+            showRequestButton = true, // Mostrar botón de request
+            onBackClick = { finish() },
+            onRequestClick = {
+                // Mostrar el request actual
+                if (currentRequestJson.isNotEmpty()) {
+                    header.showRequestJson(currentRequestJson, "REQUEST VENTA MC")
+                } else {
+                    Toast.makeText(this, "No hay request para mostrar", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+    }
+
+    // Configurar actualización automática cuando cambian los campos
+    private fun configurarActualizacionRequest() {
+        val textWatcher = object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                actualizarRequestJson()
+            }
+        }
+
+        etAmount.addTextChangedListener(textWatcher)
+        etTicketNumber.addTextChangedListener(textWatcher)
+        etEmployeeId.addTextChangedListener(textWatcher)
+        etIdSucursal.addTextChangedListener(textWatcher)
+        etIdTerminal.addTextChangedListener(textWatcher)
+        etSerialNumber.addTextChangedListener(textWatcher)
+
+        rgPrintOnPos.setOnCheckedChangeListener { _, _ ->
+            actualizarRequestJson()
+        }
+
+        spinnerSaleType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                actualizarRequestJson()
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    // Actualizar el JSON del request con los valores actuales
+    private fun actualizarRequestJson() {
+        try {
+            val amount = etAmount.getCleanMoneyValue()
+            val ticketNumber = etTicketNumber.text.toString()
+            val printOnPos = rgPrintOnPos.checkedRadioButtonId == R.id.rbPrintYes
+            val saleType = spinnerSaleType.selectedItemPosition + 1
+            val employeeId = etEmployeeId.text.toString().toIntOrNull() ?: 1
+            val idSucursal = etIdSucursal.text.toString().toIntOrNull() ?: 10606
+            val idTerminal = etIdTerminal.text.toString().toIntOrNull() ?: 80000039
+            val serialNumber = etSerialNumber.text.toString()
+
+            val commerceDataJson = JSONObject().apply {
+                put("LegalName", "InteligenciadeNegociosLimitada")
+                put("CommerceNumber", "12345")
+                put("CommerceRut", "123456789-5")
+                put("BranchNumber", idSucursal.toString())
+                put("BranchName", "LasCondes")
+                put("LittleBranchName", "LC")
+                put("BranchAddress", "Apoquindo1234")
+                put("BranchDistrict", "LasCondes")
+                put("TerminaId", idTerminal.toString())
+                put("SerialNumber", serialNumber)
+            }
+
+            val commerceParamsJson = JSONObject().apply {
+                put("IndicadorBimoneda", 0)
+                put("IndicadorBoleta", 0)
+                put("IndicadorNoVendedor", 0)
+                put("IndicadorComprobanteComoBoleta", 1)
+                put("IndicadorPropina", 0)
+                put("IndicadorVuelto", 0)
+                put("IndicadorCuotasEmisor", 1)
+                put("MinimoCuotasEmisor", 2)
+                put("MaximoCuotasEmisor", 60)
+                put("IndicadorCuotasComercio", 1)
+                put("MinimoCuotasComercio", 1)
+                put("MaximoCuotasComercio", 3)
+                put("IndicadorCuotasTasaCero", 0)
+                put("MinimoCuotasTasaCero", 0)
+                put("MaximoCuotasTasaCero", 0)
+                put("IndicadorCuotasTasaInteresConocida", 0)
+                put("MinimoCuotasTasaInteresConocida", 0)
+                put("MaximoCuotasTasaInteresConocida", 0)
+                put("TipoProductoCreditoVisa", 1)
+                put("TipoProductoDebitoVisa", 1)
+                put("TipoProductoDebitoVisaElectron", 1)
+                put("TipoProductoPrepagoVisa", 1)
+                put("TipoProductoCreditoMastercard", 1)
+                put("TipoProductoDebitoMastercard", 1)
+                put("TipoProductoDebitoMaestro", 1)
+                put("TipoProductoPrepagoMastercard", 1)
+                put("TipoProductoCreditoAmex", 1)
+                put("TipoProductoDebitoAmex", 1)
+                put("TipoProductoPrepagoAmex", 1)
+                put("TipoProductoMagna", 1)
+                put("NumeroDeFolio", 0)
+                put("PosAvance", 0)
+            }
+
+            val jsonObject = if (isCommandsMode) {
+                JSONObject().apply {
+                    put("Amount", amount)
+                    put("PrintOnPos", printOnPos)
+                    put("SaleType", saleType)
+                    put("TypeApp", 0)
+                    put("RestrictedCards", listOf("12345678", "12345679", "12345670"))
+                    put("AllowedCards", listOf("87654321", "87654322", "87654323"))
+                    put("CommerceData", commerceDataJson)
+                    put("CommerceParams", commerceParamsJson)
+                    put("PlaceCardToPayTimeout", 20)
+                    put("PaymentResultTimeout", 2)
+                }
+            } else {
+                JSONObject().apply {
+                    put("Amount", amount)
+                    put("TicketNumber", ticketNumber)
+                    put("PrintOnPos", printOnPos)
+                    put("SaleType", saleType)
+                    put("EmployeeId", employeeId)
+                    put("TypeApp", 0)
+                    put("tcBsan", true)
+                    put("tdBsan", true)
+                    put("idSucursal", idSucursal)
+                    put("idTerminal", idTerminal)
+                    put("serialNumber", serialNumber)
+                    if (commerceData != null) {
+                        put("rut", commerceData?.rut)
+                        put("direccion", commerceData?.direccion)
+                        put("ciudad", commerceData?.ciudad)
+                        put("razonSocial", commerceData?.razonSocial)
+                        put("nombreFantasia", commerceData?.nombreDeFantasia)
+                    }
+                }
+            }
+
+            currentRequestJson = jsonObject.toString(4)
+
+        } catch (e: Exception) {
+            currentRequestJson = "{\"error\": \"Error generando request: ${e.message}\"}"
+        }
     }
 
     private fun setDefaultValues() {
@@ -92,14 +242,14 @@ class VentaMCActivity : AppCompatActivity() {
         // Valores por defecto para MC
         etIdSucursal.setText("10606")
         etIdTerminal.setText("80000039")
-        etSerialNumber.setText("123456789012")
+        etSerialNumber.setText("1234567890")
+        actualizarRequestJson()
     }
 
     private fun parseCommerceData(jsonString: String?): CommerceData? {
         if (jsonString.isNullOrEmpty()) return null
 
         return try {
-            // Usar la clase CommerceData directamente
             CommerceData(
                 rut = extractJsonValue(jsonString, "rut"),
                 direccion = extractJsonValue(jsonString, "direccion"),
@@ -146,11 +296,6 @@ class VentaMCActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSaleType.adapter = adapter
         spinnerSaleType.setSelection(0)
-
-        spinnerSaleType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {}
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
     }
 
     private fun setupFooterButtons() {
@@ -312,12 +457,14 @@ class VentaMCActivity : AppCompatActivity() {
             }
 
             startActivityForResult(intent, REQUEST_CODE)
+            actualizarRequestJson() // Actualizar request después de enviar
 
         } catch (e: Exception) {
             Log.e("VENTA_MC", "Error: ${e.message}", e)
             Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -338,6 +485,7 @@ class VentaMCActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun mostrarResultado(mensaje: String) {
         android.app.AlertDialog.Builder(this)
             .setTitle("Resultado Venta Multicomercio")
