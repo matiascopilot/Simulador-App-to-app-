@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingHorizontal="12dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="8dp"
+    android:background="@color/background_main"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <!-- Ícono de expansión/colapso -->
+    <TextView
+        android:id="@+id/ivExpandIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="▼"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginEnd="8dp"
+        android:gravity="center_vertical"/>
+
+    <!-- Título de la sección -->
+    <TextView
+        android:id="@+id/tvSectionTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Viernes 6 de Febrero, 2026"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:background="@color/background_main"
+        android:paddingVertical="4dp" />
+
+</LinearLayout>

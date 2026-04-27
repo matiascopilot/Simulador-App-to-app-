@@ -52,7 +52,7 @@ class Header @JvmOverloads constructor(
 
     fun setTitle(title: String) { binding.tvTitle.text = title }
     fun setShowBackButton(show: Boolean) { binding.btnBack.visibility = if (show) VISIBLE else GONE }
-    fun setShowRequestButton(show: Boolean) { binding.btnRequest.visibility = if (show) VISIBLE else GONE }
+    fun setShowRequestButton(show: Boolean) { binding.btnRequest.visibility = if (show) VISIBLE else INVISIBLE  }
     fun setHeaderBackgroundColor(color: Int) { binding.headerRoot.setBackgroundColor(color) }
     fun setHeaderTextColor(color: Int) { binding.tvTitle.setTextColor(color) }
     fun setOnBackClickListener(listener: () -> Unit) { onBackClickListener = listener }

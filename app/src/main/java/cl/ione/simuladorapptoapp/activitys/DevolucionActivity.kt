@@ -1,4 +1,4 @@
-package cl.ione.simuladorapptoapp
+package cl.ione.simuladorapptoapp.activitys
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,9 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import cl.getnet.payment.interop.parcels.RefundRequest
 import cl.ione.simuladorapptoapp.databinding.ActivityDevolucionBinding
 import cl.ione.simuladorapptoapp.components.JsonParser
+import cl.ione.simuladorapptoapp.components.RequestManager  // ← IMPORTAR
 import cl.ione.simuladorapptoapp.components.setupMoneyFormat
 import cl.ione.simuladorapptoapp.components.getCleanMoneyValue
-import cl.ione.simuladorapptoapp.components.RequestDialog
 import org.json.JSONObject
 
 class DevolucionActivity : AppCompatActivity() {
@@ -19,7 +19,6 @@ class DevolucionActivity : AppCompatActivity() {
  private val REQUEST_CODE_DEVOLUCION = 3445
  private val TAG = "DevolucionActivity"
  private var isCommandsMode: Boolean = false
- private var currentRequestJson: String = "" // Para guardar el request actual
 
  override fun onCreate(savedInstanceState: Bundle?) {
   super.onCreate(savedInstanceState)
@@ -30,9 +29,8 @@ class DevolucionActivity : AppCompatActivity() {
 
   initViews()
   configurarHeader()
+  setupRequestManager()  // ← NUEVO
   configurarListeners()
-  configurarActualizacionRequest() // Configurar actualización automática
-  actualizarRequestJson() // Generar request inicial
  }
 
  private fun initViews() {
@@ -45,57 +43,25 @@ class DevolucionActivity : AppCompatActivity() {
   binding.header.setup(
    title = titulo,
    showBackButton = true,
-   showRequestButton = true, // Mostrar botón de request
-   onBackClick = { finish() },
-   onRequestClick = {
-    // Mostrar el request actual
-    if (currentRequestJson.isNotEmpty()) {
-     binding.header.showRequestJson(currentRequestJson, "REQUEST DEVOLUCIÓN")
-    } else {
-     Toast.makeText(this, "No hay request para mostrar", Toast.LENGTH_SHORT).show()
-    }
-   }
+   showRequestButton = true,
+   onBackClick = { finish() }
+   // onRequestClick lo maneja RequestManager
   )
  }
 
- private fun configurarListeners() {
-  binding.footerButtons.setButtons(
-   primaryText = "VOLVER",
-   secondaryText = "CONFIRMAR",
-   onPrimaryClick = { finish() },
-   onSecondaryClick = { solicitarDevolucion() }
-  )
- }
+ // 🎯 NUEVO: Setup de RequestManager
+ private fun setupRequestManager() {
+  // 1. Vincular el header con RequestManager
+  RequestManager.bind(binding.header)
 
- // Configurar actualización automática cuando cambian los campos
- private fun configurarActualizacionRequest() {
-  // TextWatcher para campos de texto
-  val textWatcher = object : android.text.TextWatcher {
-   override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-   override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-   override fun afterTextChanged(s: android.text.Editable?) {
-    actualizarRequestJson()
-   }
-  }
-
-  binding.etAuthorizationCode.addTextChangedListener(textWatcher)
-  binding.etAmount.addTextChangedListener(textWatcher)
-
-  // Listener para RadioGroup
-  binding.rgPrintOnPos.setOnCheckedChangeListener { _, _ ->
-   actualizarRequestJson()
-  }
- }
-
- // Actualizar el JSON del request con los valores actuales
- private fun actualizarRequestJson() {
-  try {
+  // 2. Función que genera el JSON con los valores actuales
+  val buildRequestJson = {
    val authorizationCode = binding.etAuthorizationCode.text.toString()
    val amount = binding.etAmount.getCleanMoneyValue()
    val printOnPos = binding.rgPrintOnPos.checkedRadioButtonId == binding.rbPrintYes.id
    val typeApp: Byte = 0
 
-   val jsonObject = if (isCommandsMode) {
+   if (isCommandsMode) {
     JSONObject().apply {
      put("AuthorizationCode", authorizationCode)
      put("Amount", amount)
@@ -112,12 +78,36 @@ class DevolucionActivity : AppCompatActivity() {
      put("TypeApp", typeApp)
     }
    }
-
-   currentRequestJson = jsonObject.toString(4)
-
-  } catch (e: Exception) {
-   currentRequestJson = "{\"error\": \"Error generando request: ${e.message}\"}"
   }
+
+  // 3. Vincular los campos automáticamente
+  val titulo = if (isCommandsMode) "Devolución JSON" else "Devolución (Librería)"
+
+  // Bind EditTexts
+  RequestManager.bindEditText(
+   binding.etAuthorizationCode, binding.etAmount,
+   updateFunction = buildRequestJson,
+   title = titulo
+  )
+
+  // Bind RadioGroup
+  RequestManager.bindRadioGroup(
+   binding.rgPrintOnPos,
+   updateFunction = buildRequestJson,
+   title = titulo
+  )
+
+  // 4. Inicializar con valores por defecto
+  RequestManager.initWithDefault(buildRequestJson, titulo)
+ }
+
+ private fun configurarListeners() {
+  binding.footerButtons.setButtons(
+   primaryText = "VOLVER",
+   secondaryText = "CONFIRMAR",
+   onPrimaryClick = { finish() },
+   onSecondaryClick = { solicitarDevolucion() }
+  )
  }
 
  private fun solicitarDevolucion() {
@@ -171,18 +161,7 @@ class DevolucionActivity : AppCompatActivity() {
     intent.putExtra("params", request)
     Log.d(TAG, "RefundRequest: $authorizationCode, $amount, $printOnPos, $typeApp")
    }
-
-   val actividades = packageManager.queryIntentActivities(intent, 0)
-   if (actividades.isNotEmpty()) {
     startActivityForResult(intent, REQUEST_CODE_DEVOLUCION)
-    // Actualizar request después de enviar
-    actualizarRequestJson()
-   } else {
-    Toast.makeText(this,
-     "Getnet no está disponible en este dispositivo",
-     Toast.LENGTH_LONG).show()
-   }
-
   } catch (e: Exception) {
    Log.e(TAG, "Error: ${e.message}", e)
    Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
@@ -191,35 +170,33 @@ class DevolucionActivity : AppCompatActivity() {
 
  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
   super.onActivityResult(requestCode, resultCode, data)
+
   if (requestCode == REQUEST_CODE_DEVOLUCION) {
-   procesarRespuestaDevolucion(resultCode, data)
-  }
- }
+   val requestData = RequestManager.getCurrentRequest()
 
- private fun procesarRespuestaDevolucion(resultCode: Int, data: Intent?) {
-  when (resultCode) {
-   RESULT_OK -> {
-    JsonParser.showDevolucionResult(this, data)
-   }
-   RESULT_CANCELED -> {
-    val error = data?.getStringExtra("error") ?: "Operación cancelada"
-    mostrarResultado("DEVOLUCIÓN CANCELADA\n\n$error")
-   }
-   else -> {
-    val errorMsg = data?.getStringExtra("error") ?:
-    data?.getStringExtra("message") ?:
-    "Error desconocido"
-    mostrarResultado("DEVOLUCIÓN RECHAZADA\n\nMotivo: $errorMsg")
+   when (resultCode) {
+    RESULT_OK -> {
+     JsonParser.showDevolucionResult(this, data, requestData = requestData)
+    }
+
+    RESULT_CANCELED -> {
+     JsonParser.showErrorWithRetry(
+      activity = this,
+      data = data,
+      title = "DEVOLUCIÓN CANCELADA",
+      onRetry = { solicitarDevolucion() }
+     )
+    }
+
+    else -> {
+     JsonParser.showErrorWithRetry(
+      activity = this,
+      data = data,
+      title = "DEVOLUCIÓN RECHAZADA",
+      onRetry = { solicitarDevolucion() }
+     )
+    }
    }
   }
- }
-
- private fun mostrarResultado(mensaje: String) {
-  android.app.AlertDialog.Builder(this)
-   .setTitle("Resultado de Devolución")
-   .setMessage(mensaje)
-   .setPositiveButton("ACEPTAR") { _, _ -> finish() }
-   .setCancelable(false)
-   .show()
  }
 }

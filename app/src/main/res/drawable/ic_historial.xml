@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="@color/primary_red">
+
+    <!-- Documento base (rectángulo) -->
+    <path
+        android:strokeColor="@color/primary_red"
+        android:strokeWidth="1.5"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M5,3 L19,3 L19,21 L5,21 L5,3 Z" />
+
+    <!-- Línea superior (título) -->
+    <path
+        android:strokeColor="@color/primary_red"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M8,7 L16,7" />
+
+    <!-- Línea media (contenido) -->
+    <path
+        android:strokeColor="@color/primary_red"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M8,12 L16,12" />
+
+    <!-- Línea inferior (contenido) -->
+    <path
+        android:strokeColor="@color/primary_red"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M8,17 L13,17" />
+
+</vector>

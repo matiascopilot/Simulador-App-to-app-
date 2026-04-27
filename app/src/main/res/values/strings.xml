@@ -26,7 +26,7 @@
 
     <!-- Descripciones -->
     <string name="sale_description">Procesar una nueva transacción</string>
-    <string name="sale_description_mc">Crear transacción Multi-Comercio</string>
+    <string name="sale_description_mc">Comandos Multi-Comercio</string>
     <string name="void_description">Cancelar una venta</string>
     <string name="refund_description">Devolver dinero a un cliente</string>
     <string name="duplicate_description">Imprimir o compartir último ticket</string>
@@ -48,8 +48,9 @@
 
     <string name="realizar_cierre">Realiza el cierre diario de operaciones</string>
     <string name="confirmar_solitud">Al confirmar se enviará la solicitud</string>
+    <string name="simulador_app_to_app">Simulador App To App</string>
 
-<!--    TIPOS DE VENTAS-->
+    <!--    TIPOS DE VENTAS-->
     <string-array name="sale_type_values">
         <item>Compra Afecta</item>
         <item>Factura Afecta</item>

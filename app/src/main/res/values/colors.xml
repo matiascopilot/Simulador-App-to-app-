@@ -21,42 +21,44 @@
     <color name="text_secondary">#64748B</color>
     <color name="text_getnet">#ec0000</color>
 
-    <!-- COLORES DE ICONOS - Modo Comandos (oscuros) -->
-    <color name="red_dark">#C62828</color>        <!-- Rojo oscuro -->
-    <color name="purple_dark">#6A1B9A</color>     <!-- Púrpura oscuro -->
-    <color name="teal_dark">#00695C</color>       <!-- Teal oscuro -->
-    <color name="blue_dark">#1565C0</color>       <!-- Azul oscuro -->
-    <color name="amber_dark">#FF8F00</color>      <!-- Ámbar oscuro -->
-    <color name="emerald_dark">#2E7D32</color>    <!-- Verde oscuro -->
-    <color name="cyan_dark">#00838F</color>       <!-- Cyan oscuro -->
+    <!-- COLORES DE ICONOS - Modo Comandos (aún más claros) -->
+    <color name="red_dark">#E53935</color>        <!-- Rojo más suave -->
+    <color name="purple_dark">#9C27B0</color>     <!-- Púrpura más suave -->
+    <color name="teal_dark">#009688</color>       <!-- Teal más suave -->
+    <color name="blue_dark">#1976D2</color>       <!-- Azul más suave -->
+    <color name="amber_dark">#FF9800</color>      <!-- Ámbar más suave -->
+    <color name="emerald_dark">#4CAF50</color>    <!-- Verde más suave -->
+    <color name="cyan_dark">#00ACC1</color>       <!-- Cyan más suave -->
+    <color name="orange_dark">#FF9800</color>     <!-- Naranja más suave -->
 
-    <!-- COLORES DE FONDO - Modo Comandos (claros) -->
-    <color name="red_light">#FFCDD2</color>       <!-- Rojo claro -->
-    <color name="purple_light">#E1BEE7</color>    <!-- Lila claro -->
-    <color name="teal_light">#B2DFDB</color>      <!-- Teal claro -->
-    <color name="blue_light">#BBDEFB</color>      <!-- Azul claro -->
-    <color name="amber_light">#FFECB3</color>     <!-- Ámbar claro -->
-    <color name="emerald_light">#C8E6C9</color>   <!-- Verde claro -->
-    <color name="cyan_light">#B2EBF2</color>      <!-- Cyan claro -->
-    <color name="orange_light">#FFE0B2</color>  <!-- Naranja claro -->
-    <color name="orange_dark">#E65100</color>   <!-- Naranja oscuro -->
+    <!-- COLORES DE FONDO - Modo Comandos (claros) - MEJORADOS -->
+    <color name="red_light">#FFE5E5</color>       <!-- Rojo claro profesional -->
+    <color name="purple_light">#F3E0FF</color>    <!-- Lila claro profesional -->
+    <color name="teal_light">#D6F0EC</color>      <!-- Teal claro profesional -->
+    <color name="blue_light">#E1EDFF</color>      <!-- Azul claro profesional -->
+    <color name="amber_light">#FFF0D6</color>     <!-- Ámbar claro profesional -->
+    <color name="emerald_light">#E1F5E6</color>   <!-- Verde claro profesional -->
+    <color name="cyan_light">#D6F3F7</color>      <!-- Cyan claro profesional -->
+    <color name="orange_light">#FFF0E0</color>    <!-- Naranja claro profesional -->
 
-    <!-- 🎯 COLORES DE FONDO - Modo Shortcuts (OSCUROS - MEJOR CONTRASTE) -->
-    <color name="red_darker">#B71C1C</color>      <!-- Rojo oscuro intenso -->
-    <color name="purple_darker">#4A148C</color>   <!-- Púrpura oscuro intenso -->
-    <color name="teal_darker">#004D40</color>     <!-- Teal oscuro intenso -->
-    <color name="blue_darker">#0D47A1</color>     <!-- Azul oscuro intenso -->
-    <color name="amber_darker">#C43E00</color>    <!-- Naranja oscuro intenso -->
-    <color name="emerald_darker">#1B5E20</color>  <!-- Verde oscuro intenso -->
-    <color name="cyan_darker">#006064</color>     <!-- Cyan oscuro intenso -->
+    <!-- COLORES DE FONDO - Modo Shortcuts (OSCUROS - MEJOR CONTRASTE) -->
+    <color name="red_darker">#8B1A1A</color>      <!-- Rojo oscuro intenso profesional -->
+    <color name="purple_darker">#451759</color>   <!-- Púrpura oscuro intenso profesional -->
+    <color name="teal_darker">#004C41</color>     <!-- Teal oscuro intenso profesional -->
+    <color name="blue_darker">#0A3A62</color>     <!-- Azul oscuro intenso profesional -->
+    <color name="amber_darker">#994A00</color>    <!-- Ámbar oscuro intenso profesional -->
+    <color name="emerald_darker">#1C522B</color>  <!-- Verde oscuro intenso profesional -->
+    <color name="cyan_darker">#005761</color>     <!-- Cyan oscuro intenso profesional -->
+    <color name="orange_darker">#993E00</color>   <!-- Naranja oscuro intenso profesional -->
 
-    <!-- 🎯 COLORES DE ICONO - Modo Shortcuts (claros) -->
-    <color name="red_darker_light">#FFEBEE</color>   <!-- Blanco rosado -->
-    <color name="purple_darker_light">#F3E5F5</color> <!-- Blanco lila -->
-    <color name="teal_darker_light">#E0F2F1</color>   <!-- Blanco verde -->
-    <color name="blue_darker_light">#E3F2FD</color>   <!-- Blanco azul -->
-    <color name="amber_darker_light">#FFF3E0</color>  <!-- Blanco naranja -->
-    <color name="emerald_darker_light">#E8F5E9</color> <!-- Blanco verde -->
-    <color name="cyan_darker_light">#E0F7FA</color>   <!-- Blanco cyan -->
+    <!-- COLORES DE ICONO - Modo Shortcuts (claros) - MEJORADOS -->
+    <color name="red_darker_light">#FFF1F0</color>   <!-- Rosa muy pálido -->
+    <color name="purple_darker_light">#F9F0FF</color> <!-- Lila muy pálido -->
+    <color name="teal_darker_light">#E6F5F2</color>   <!-- Verde agua muy pálido -->
+    <color name="blue_darker_light">#EDF3FF</color>   <!-- Azul muy pálido -->
+    <color name="amber_darker_light">#FFF7E6</color>  <!-- Ámbar muy pálido -->
+    <color name="emerald_darker_light">#EBF7EE</color> <!-- Verde muy pálido -->
+    <color name="cyan_darker_light">#E6F7FA</color>   <!-- Cyan muy pálido -->
+    <color name="orange_darker_light">#FFF7E6</color> <!-- Naranja muy pálido -->
 
 </resources>

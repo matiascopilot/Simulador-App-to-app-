@@ -2,6 +2,11 @@ package cl.ione.simuladorapptoapp.components
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import androidx.appcompat.app.AlertDialog
+import cl.ione.simuladorapptoapp.models.HistoryItem
+import cl.ione.simuladorapptoapp.utils.HistoryManager
+import org.json.JSONArray
 import org.json.JSONObject
 
 object JsonParser {
@@ -11,21 +16,36 @@ object JsonParser {
      * Procesa y muestra la respuesta de venta en un diálogo con formato ordenado
      * Soporta ambos modos: librería (isCommandsMode = false) y JSON (isCommandsMode = true)
      */
-    fun showVentaResult(activity: android.app.Activity, data: Intent?, isCommandsMode: Boolean = false) {
+    fun showVentaResult(
+        activity: android.app.Activity,
+        data: Intent?,
+        isCommandsMode: Boolean = false,
+        requestData: String = ""
+    ) {
         currentDialog?.dismiss()
         try {
             val (status, jsonObject) = parseVentaResponseDetailed(data)
 
-            // Crear JSON ordenado según el modo
             val orderedJson = if (isCommandsMode) {
-                // MODO JSON - Formato completo con todos los campos
                 createJsonModeJson(jsonObject)
             } else {
-                // MODO LIBRERÍA - Formato básico de la librería
                 createLibreriaModeJson(jsonObject)
             }
 
             val jsonFormatted = orderedJson.toString(2)
+            val historyItem = HistoryItem(
+                commandType = "VENTA",
+                mode = if (isCommandsMode) "JSON" else "LIBRERÍA",
+                requestData = requestData,
+                responseData = jsonFormatted,
+                result = status,
+                responseCode = jsonObject.optString("ResponseCode", "-1"),
+                amount = jsonObject.optInt("Amount"),
+                ticketNumber = jsonObject.optString("Ticket"),
+                authorizationCode = jsonObject.optString("AuthorizationCode"),
+                functionCode = jsonObject.optInt("FunctionCode")
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
 
             currentDialog = android.app.AlertDialog.Builder(activity)
                 .setTitle(status)
@@ -53,29 +73,29 @@ object JsonParser {
     private fun createLibreriaModeJson(jsonObject: JSONObject): JSONObject {
         val orderedJson = JSONObject()
 
-        // Campos básicos de la librería
-        orderedJson.put("FunctionCode", jsonObject.optInt("FunctionCode", 100))
-        orderedJson.put("ResponseCode", jsonObject.optString("ResponseCode", "0"))
-        orderedJson.put("ResponseMessage", jsonObject.optString("ResponseMessage", "Aprobado"))
-        orderedJson.put("CommerceCode", jsonObject.optLong("CommerceCode", 550062700310))
-        orderedJson.put("TerminalId", jsonObject.optString("TerminalId", "ABC1234C"))
-        orderedJson.put("Ticket", jsonObject.optString("Ticket", "ABC123"))
-        orderedJson.put("AuthorizationCode", jsonObject.optString("AuthorizationCode", "XZ123456"))
-        orderedJson.put("Amount", jsonObject.optInt("Amount", 15000))
-        orderedJson.put("SharesNumber", jsonObject.optInt("SharesNumber", 3))
-        orderedJson.put("SharesAmount", jsonObject.optInt("SharesAmount", 5000))
-        orderedJson.put("Last4Digits", jsonObject.optInt("Last4Digits", 6677))
-        orderedJson.put("OperationId", jsonObject.optInt("OperationId", 60))
-        orderedJson.put("CardType", jsonObject.optString("CardType", "CR"))
-        orderedJson.put("AccountingDate", jsonObject.optString("AccountingDate", "2023-12-28 22:35:12"))
-        orderedJson.put("AccountNumber", jsonObject.optString("AccountNumber", "30000000000"))
-        orderedJson.put("CardBrand", jsonObject.optString("CardBrand", "AX"))
-        orderedJson.put("RealDate", jsonObject.optString("RealDate", "2023-12-28 22:35:12"))
-        orderedJson.put("EmployeeId", jsonObject.optInt("EmployeeId", 1))
-        orderedJson.put("Tip", jsonObject.optInt("Tip", 1500))
-        orderedJson.put("SaleType", jsonObject.optInt("SaleType", 0))  // Por defecto 0 en librería
-        orderedJson.put("PosMode", jsonObject.optInt("PosMode", 1))
-        orderedJson.put("Cashback", jsonObject.optInt("Cashback", 1000))
+        // Campos básicos de la librería - sin valores hardcodeados
+        jsonObject.optInt("FunctionCode").takeIf { it != 0 }?.let { orderedJson.put("FunctionCode", it) }
+        jsonObject.optString("ResponseCode").takeIf { it.isNotEmpty() }?.let { orderedJson.put("ResponseCode", it) }
+        jsonObject.optString("ResponseMessage").takeIf { it.isNotEmpty() }?.let { orderedJson.put("ResponseMessage", it) }
+        jsonObject.optLong("CommerceCode").takeIf { it != 0L }?.let { orderedJson.put("CommerceCode", it) }
+        jsonObject.optString("TerminalId").takeIf { it.isNotEmpty() }?.let { orderedJson.put("TerminalId", it) }
+        jsonObject.optString("Ticket").takeIf { it.isNotEmpty() }?.let { orderedJson.put("Ticket", it) }
+        jsonObject.optString("AuthorizationCode").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AuthorizationCode", it) }
+        jsonObject.optInt("Amount").takeIf { it != 0 }?.let { orderedJson.put("Amount", it) }
+        jsonObject.optInt("SharesNumber").takeIf { it != 0 }?.let { orderedJson.put("SharesNumber", it) }
+        jsonObject.optInt("SharesAmount").takeIf { it != 0 }?.let { orderedJson.put("SharesAmount", it) }
+        jsonObject.optInt("Last4Digits").takeIf { it != 0 }?.let { orderedJson.put("Last4Digits", it) }
+        jsonObject.optInt("OperationId").takeIf { it != 0 }?.let { orderedJson.put("OperationId", it) }
+        jsonObject.optString("CardType").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CardType", it) }
+        jsonObject.optString("AccountingDate").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AccountingDate", it) }
+        jsonObject.optString("AccountNumber").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AccountNumber", it) }
+        jsonObject.optString("CardBrand").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CardBrand", it) }
+        jsonObject.optString("RealDate").takeIf { it.isNotEmpty() }?.let { orderedJson.put("RealDate", it) }
+        jsonObject.optInt("EmployeeId").takeIf { it != 0 }?.let { orderedJson.put("EmployeeId", it) }
+        jsonObject.optInt("Tip").takeIf { it != 0 }?.let { orderedJson.put("Tip", it) }
+        jsonObject.optInt("SaleType").takeIf { it != 0 }?.let { orderedJson.put("SaleType", it) }
+        jsonObject.optInt("PosMode").takeIf { it != 0 }?.let { orderedJson.put("PosMode", it) }
+        jsonObject.optInt("Cashback").takeIf { it != 0 }?.let { orderedJson.put("Cashback", it) }
 
         return orderedJson
     }
@@ -86,45 +106,129 @@ object JsonParser {
     private fun createJsonModeJson(jsonObject: JSONObject): JSONObject {
         val orderedJson = JSONObject()
 
-        // Campos base
-        orderedJson.put("FunctionCode", jsonObject.optInt("FunctionCode", 100))
-        orderedJson.put("ResponseCode", jsonObject.optString("ResponseCode", "0"))
-        orderedJson.put("ResponseMessage", jsonObject.optString("ResponseMessage", "Aprobado"))
-        orderedJson.put("CommerceCode", jsonObject.optLong("CommerceCode", 550062700310))
-        orderedJson.put("TerminalId", jsonObject.optString("TerminalId", "ABC1234C"))
-        orderedJson.put("Ticket", jsonObject.optString("Ticket", "123456789012345678901234"))
-        orderedJson.put("AuthorizationCode", jsonObject.optString("AuthorizationCode", "XZ123456"))
-        orderedJson.put("Amount", jsonObject.optInt("Amount", 15000))
-        orderedJson.put("SharesNumber", jsonObject.optInt("SharesNumber", 3))
-        orderedJson.put("SharesAmount", jsonObject.optInt("SharesAmount", 5000))
-        orderedJson.put("Last4Digits", jsonObject.optInt("Last4Digits", 6677))
-        orderedJson.put("OperationId", jsonObject.optInt("OperationId", 60))
-        orderedJson.put("CardType", jsonObject.optString("CardType", "CR"))
-        orderedJson.put("AccountingDate", jsonObject.optString("AccountingDate", "2023-12-28 22:35:12"))
-        orderedJson.put("AccountNumber", jsonObject.optString("AccountNumber", "30000000000"))
-        orderedJson.put("CardBrand", jsonObject.optString("CardBrand", "AX"))
-        orderedJson.put("RealDate", jsonObject.optString("RealDate", "2023-12-28 22:35:12"))
-        orderedJson.put("EmployeeId", jsonObject.optInt("EmployeeId", 1))
-        orderedJson.put("Tip", jsonObject.optInt("Tip", 1500))
-        orderedJson.put("SaleType", jsonObject.optInt("SaleType", 1))  // Por defecto 1 en JSON
-        orderedJson.put("PosMode", jsonObject.optInt("PosMode", 1))
-        orderedJson.put("Cashback", jsonObject.optInt("Cashback", 1000))
+        // Campos base - sin valores hardcodeados
+        jsonObject.optInt("FunctionCode").takeIf { it != 0 }?.let { orderedJson.put("FunctionCode", it) }
+        jsonObject.optString("ResponseCode").takeIf { it.isNotEmpty() }?.let { orderedJson.put("ResponseCode", it) }
+        jsonObject.optString("ResponseMessage").takeIf { it.isNotEmpty() }?.let { orderedJson.put("ResponseMessage", it) }
+        jsonObject.optLong("CommerceCode").takeIf { it != 0L }?.let { orderedJson.put("CommerceCode", it) }
+        jsonObject.optString("TerminalId").takeIf { it.isNotEmpty() }?.let { orderedJson.put("TerminalId", it) }
+        jsonObject.optString("Ticket").takeIf { it.isNotEmpty() }?.let { orderedJson.put("Ticket", it) }
+        jsonObject.optString("AuthorizationCode").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AuthorizationCode", it) }
+        jsonObject.optInt("Amount").takeIf { it != 0 }?.let { orderedJson.put("Amount", it) }
+        jsonObject.optInt("SharesNumber").takeIf { it != 0 }?.let { orderedJson.put("SharesNumber", it) }
+        jsonObject.optInt("SharesAmount").takeIf { it != 0 }?.let { orderedJson.put("SharesAmount", it) }
+        jsonObject.optInt("Last4Digits").takeIf { it != 0 }?.let { orderedJson.put("Last4Digits", it) }
+        jsonObject.optInt("OperationId").takeIf { it != 0 }?.let { orderedJson.put("OperationId", it) }
+        jsonObject.optString("CardType").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CardType", it) }
+        jsonObject.optString("AccountingDate").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AccountingDate", it) }
+        jsonObject.optString("AccountNumber").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AccountNumber", it) }
+        jsonObject.optString("CardBrand").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CardBrand", it) }
+        jsonObject.optString("RealDate").takeIf { it.isNotEmpty() }?.let { orderedJson.put("RealDate", it) }
+        jsonObject.optInt("EmployeeId").takeIf { it != 0 }?.let { orderedJson.put("EmployeeId", it) }
+        jsonObject.optInt("Tip").takeIf { it != 0 }?.let { orderedJson.put("Tip", it) }
+        jsonObject.optInt("SaleType").takeIf { it != 0 }?.let { orderedJson.put("SaleType", it) }
+        jsonObject.optInt("PosMode").takeIf { it != 0 }?.let { orderedJson.put("PosMode", it) }
+        jsonObject.optInt("Cashback").takeIf { it != 0 }?.let { orderedJson.put("Cashback", it) }
 
-        // Campos adicionales solo en modo JSON
-        orderedJson.putOpt("TransToken", jsonObject.optString("TransToken"))
-        orderedJson.putOpt("ExpiryDate", jsonObject.optString("ExpiryDate"))
-        orderedJson.putOpt("EntryMode", jsonObject.optString("EntryMode"))
-        orderedJson.putOpt("Aid", jsonObject.optString("Aid"))
-        orderedJson.putOpt("CommerceRut", jsonObject.optString("CommerceRut"))
-        orderedJson.putOpt("CommerceName", jsonObject.optString("CommerceName"))
-        orderedJson.putOpt("BranchName", jsonObject.optString("BranchName"))
-        orderedJson.putOpt("BranchAddress", jsonObject.optString("BranchAddress"))
-        orderedJson.putOpt("BranchDistrict", jsonObject.optString("BranchDistrict"))
-        orderedJson.putOpt("Bin", jsonObject.optString("Bin"))
+        // Campos adicionales solo en modo JSON - sin valores hardcodeados
+        jsonObject.optString("TransToken").takeIf { it.isNotEmpty() }?.let { orderedJson.put("TransToken", it) }
+        jsonObject.optString("ExpiryDate").takeIf { it.isNotEmpty() }?.let { orderedJson.put("ExpiryDate", it) }
+        jsonObject.optString("EntryMode").takeIf { it.isNotEmpty() }?.let { orderedJson.put("EntryMode", it) }
+        jsonObject.optString("Aid").takeIf { it.isNotEmpty() }?.let { orderedJson.put("Aid", it) }
+        jsonObject.optString("CommerceRut").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CommerceRut", it) }
+        jsonObject.optString("CommerceName").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CommerceName", it) }
+        jsonObject.optString("BranchName").takeIf { it.isNotEmpty() }?.let { orderedJson.put("BranchName", it) }
+        jsonObject.optString("BranchAddress").takeIf { it.isNotEmpty() }?.let { orderedJson.put("BranchAddress", it) }
+        jsonObject.optString("BranchDistrict").takeIf { it.isNotEmpty() }?.let { orderedJson.put("BranchDistrict", it) }
+        jsonObject.optString("Bin").takeIf { it.isNotEmpty() }?.let { orderedJson.put("Bin", it) }
 
         return orderedJson
     }
 
+    /**
+     * Extrae el mensaje de error de un Intent de forma consistente
+     */
+    fun extractErrorMessage(data: Intent?, includeDetails: Boolean = true): String {
+        if (data == null) return "No se recibió información de error"
+
+        // Intentar obtener params como String (formato JSON)
+        val paramsString = data.getStringExtra("params")
+
+        if (!paramsString.isNullOrEmpty()) {
+            try {
+                val jsonObject = JSONObject(paramsString)
+                val responseMessage = jsonObject.optString("ResponseMessage", "")
+                val responseCode = jsonObject.optString("ResponseCode", "")
+
+                if (responseMessage.isNotEmpty()) {
+                    return if (includeDetails && responseCode.isNotEmpty() && responseCode != "0") {
+                        "Error $responseCode: $responseMessage"
+                    } else {
+                        responseMessage
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("JsonParser", "Error parseando JSON: ${e.message}")
+            }
+        }
+
+        // Buscar en otras keys comunes
+        val errorMsg = data.getStringExtra("error") ?:
+        data.getStringExtra("message") ?:
+        data.getStringExtra("errorMessage") ?:
+        data.getStringExtra("error_description")
+
+        return if (!errorMsg.isNullOrEmpty()) errorMsg else "Error desconocido"
+    }
+
+    /**
+     * Muestra un diálogo de error con opción de reintentar
+     */
+    fun showErrorWithRetry(
+        activity: android.app.Activity,
+        data: Intent?,
+        title: String = "ERROR EN TRANSACCIÓN",
+        onRetry: () -> Unit,
+        onCancel: (() -> Unit)? = null
+    ) {
+        val errorMessage = extractErrorMessage(data, includeDetails = true)
+
+        android.app.AlertDialog.Builder(activity)
+            .setTitle(title)
+            .setMessage("$errorMessage\n\n¿Desea intentar nuevamente?")
+            .setPositiveButton("REINTENTAR") { dialog, _ ->
+                dialog.dismiss()
+                onRetry()
+            }
+            .setNegativeButton("CANCELAR") { dialog, _ ->
+                dialog.dismiss()
+                onCancel?.invoke()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    /**
+     * Muestra un diálogo de error simple (solo información, sin reintentar)
+     */
+    fun showErrorSimple(
+        activity: android.app.Activity,
+        data: Intent?,
+        title: String = "ERROR",
+        onDismiss: (() -> Unit)? = null
+    ) {
+        val errorMessage = extractErrorMessage(data, includeDetails = true)
+
+        android.app.AlertDialog.Builder(activity)
+            .setTitle(title)
+            .setMessage(errorMessage)
+            .setPositiveButton("ACEPTAR") { dialog, _ ->
+                dialog.dismiss()
+                onDismiss?.invoke()
+            }
+            .setCancelable(false)
+            .show()
+    }
     /**
      * Parsea respuesta de venta y retorna el status y el JSONObject
      */
@@ -191,13 +295,36 @@ object JsonParser {
     }
 
     /**
-     * Procesa y muestra la respuesta de cierre en un diálogo
-     * Uso: JsonParser.showCierreResult(activity, data)
+     * Procesa y muestra la respuesta de Venta Multicomercio en un diálogo con formato ordenado
      */
-    fun showCierreResult(activity: android.app.Activity, data: Intent?) {
+    fun showVentaMCResult(
+        activity: android.app.Activity,
+        data: Intent?,
+        requestData: String = ""
+    ) {
         currentDialog?.dismiss()
         try {
-            val (status, jsonFormatted) = parseCierreResponse(data)
+            val (status, jsonObject) = parseVentaMCResponseDetailed(data)
+
+            // Crear JSON ordenado específico para Venta MC
+            val orderedJson = createVentaMCJson(jsonObject)
+
+            val jsonFormatted = orderedJson.toString(2)
+
+            // Guardar en historial
+            val historyItem = HistoryItem(
+                commandType = "VENTA MC",
+                mode = "JSON",
+                requestData = requestData,
+                responseData = jsonFormatted,
+                result = status,
+                responseCode = jsonObject.optString("ResponseCode", "-1"),
+                amount = jsonObject.optInt("Amount"),
+                ticketNumber = jsonObject.optString("Ticket"),
+                authorizationCode = jsonObject.optString("AuthorizationCode"),
+                functionCode = jsonObject.optInt("FunctionCode")
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
 
             currentDialog = android.app.AlertDialog.Builder(activity)
                 .setTitle(status)
@@ -206,7 +333,142 @@ object JsonParser {
                     dialog.dismiss()
                     currentDialog = null
                     activity.finish()
-                }.setOnDismissListener {
+                }
+                .setOnDismissListener {
+                    currentDialog = null
+                }
+                .setCancelable(false)
+                .show()
+
+        } catch (e: Exception) {
+            currentDialog = null
+            showErrorDialog(activity, "Error: ${e.message}", data?.extras?.toString())
+        }
+    }
+
+    /**
+     * Crea JSON ordenado específico para Venta MC con todos los campos requeridos
+     */
+    private fun createVentaMCJson(jsonObject: JSONObject): JSONObject {
+        val orderedJson = JSONObject()
+
+        // Campos principales de respuesta - solo si existen en el JSON original
+        jsonObject.optInt("FunctionCode").takeIf { it != 0 }?.let { orderedJson.put("FunctionCode", it) }
+        jsonObject.optString("ResponseCode").takeIf { it.isNotEmpty() }?.let { orderedJson.put("ResponseCode", it) }
+        jsonObject.optString("ResponseMessage").takeIf { it.isNotEmpty() }?.let { orderedJson.put("ResponseMessage", it) }
+        jsonObject.optLong("CommerceCode").takeIf { it != 0L }?.let { orderedJson.put("CommerceCode", it) }
+        jsonObject.optString("TerminalId").takeIf { it.isNotEmpty() }?.let { orderedJson.put("TerminalId", it) }
+        jsonObject.optString("Ticket").takeIf { it.isNotEmpty() }?.let { orderedJson.put("Ticket", it) }
+        jsonObject.optString("AuthorizationCode").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AuthorizationCode", it) }
+        jsonObject.optInt("Amount").takeIf { it != 0 }?.let { orderedJson.put("Amount", it) }
+        jsonObject.optInt("SharesNumber").takeIf { it != 0 }?.let { orderedJson.put("SharesNumber", it) }
+        jsonObject.optInt("SharesAmount").takeIf { it != 0 }?.let { orderedJson.put("SharesAmount", it) }
+        jsonObject.optString("Last4Digits").takeIf { it.isNotEmpty() }?.let { orderedJson.put("Last4Digits", it) }
+        jsonObject.optInt("OperationId").takeIf { it != 0 }?.let { orderedJson.put("OperationId", it) }
+        jsonObject.optString("CardType").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CardType", it) }
+        jsonObject.optString("AccountingDate").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AccountingDate", it) }
+        jsonObject.optString("AccountNumber").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AccountNumber", it) }
+        jsonObject.optString("CardBrand").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CardBrand", it) }
+        jsonObject.optString("RealDate").takeIf { it.isNotEmpty() }?.let { orderedJson.put("RealDate", it) }
+        jsonObject.optInt("EmployeeId").takeIf { it != 0 }?.let { orderedJson.put("EmployeeId", it) }
+        jsonObject.optInt("Tip").takeIf { it != 0 }?.let { orderedJson.put("Tip", it) }
+        jsonObject.optInt("SaleType").takeIf { it != 0 }?.let { orderedJson.put("SaleType", it) }
+        jsonObject.optInt("PosMode").takeIf { it != 0 }?.let { orderedJson.put("PosMode", it) }
+        jsonObject.optInt("Cashback").takeIf { it != 0 }?.let { orderedJson.put("Cashback", it) }
+
+        // Campos específicos de Venta MC - solo si existen
+        jsonObject.optString("TransToken").takeIf { it.isNotEmpty() }?.let { orderedJson.put("TransToken", it) }
+        jsonObject.optString("ExpiryDate").takeIf { it.isNotEmpty() }?.let { orderedJson.put("ExpiryDate", it) }
+        jsonObject.optString("EntryMode").takeIf { it.isNotEmpty() }?.let { orderedJson.put("EntryMode", it) }
+        jsonObject.optString("AID").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AID", it) }
+        jsonObject.optString("CommerceRut").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CommerceRut", it) }
+        jsonObject.optString("CommerceName").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CommerceName", it) }
+        jsonObject.optString("BranchName").takeIf { it.isNotEmpty() }?.let { orderedJson.put("BranchName", it) }
+        jsonObject.optString("BranchAddress").takeIf { it.isNotEmpty() }?.let { orderedJson.put("BranchAddress", it) }
+        jsonObject.optString("BranchDistrict").takeIf { it.isNotEmpty() }?.let { orderedJson.put("BranchDistrict", it) }
+        jsonObject.optString("Bin").takeIf { it.isNotEmpty() }?.let { orderedJson.put("Bin", it) }
+
+        // Campos ISO - solo si existen
+        jsonObject.optString("hostRRN").takeIf { it.isNotEmpty() }?.let { orderedJson.put("hostRRN", it) }
+        jsonObject.optString("mti").takeIf { it.isNotEmpty() }?.let { orderedJson.put("mti", it) }
+        jsonObject.optString("de11").takeIf { it.isNotEmpty() }?.let { orderedJson.put("de11", it) }
+        jsonObject.optString("de12").takeIf { it.isNotEmpty() }?.let { orderedJson.put("de12", it) }
+        jsonObject.optString("de13").takeIf { it.isNotEmpty() }?.let { orderedJson.put("de13", it) }
+
+        return orderedJson
+    }
+
+    /**
+     * Parsea respuesta de Venta MC y retorna el status y el JSONObject
+     */
+    private fun parseVentaMCResponseDetailed(data: Intent?): Pair<String, JSONObject> {
+        val extras = data?.extras ?: Bundle()
+        var jsonObject = JSONObject()
+
+        if (extras.containsKey("response")) {
+            val response = extras.getSerializable("response")
+            if (response != null) {
+                jsonObject = JSONObject(response.toString())
+            }
+        } else if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                jsonObject = JSONObject(jsonString)
+            }
+        }
+
+        val status = determineVentaMCStatus(jsonObject)
+        return Pair(status, jsonObject)
+    }
+
+    /**
+     * Determina el estado de la Venta MC
+     */
+    private fun determineVentaMCStatus(jsonObject: JSONObject): String {
+        val responseCode = jsonObject.optString("ResponseCode", "-1")
+        val responseMessage = jsonObject.optString("ResponseMessage", "")
+
+        return when {
+            responseCode == "0" || responseCode == "00" -> "VENTA MC APROBADA"
+            responseCode == "-1" && responseMessage.isNotEmpty() -> "VENTA MC RECHAZADA - $responseMessage"
+            responseCode == "-1" -> "VENTA MC RECHAZADA"
+            else -> "VENTA MC RECHAZADA (Código: $responseCode)"
+        }
+    }
+    /**
+     * Procesa y muestra la respuesta de cierre en un diálogo
+     * Uso: JsonParser.showCierreResult(activity, data)
+     */
+    fun showCierreResult(activity: android.app.Activity, data: Intent?, requestData: String = "") {
+        currentDialog?.dismiss()
+        try {
+            val (status, jsonFormatted, jsonObject) = parseCierreResponseDetailed(data)
+
+            // Crear HistoryItem
+            val historyItem = HistoryItem(
+                commandType = "CIERRE",
+                mode = "LIBRERÍA",
+                requestData = requestData,
+                responseData = jsonFormatted,
+                result = status,
+                responseCode = jsonObject.optString("ResponseCode", "-1"),
+                amount = null,
+                ticketNumber = null,
+                authorizationCode = null,
+                functionCode = jsonObject.optInt("FunctionCode")
+
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
+
+            currentDialog = android.app.AlertDialog.Builder(activity)
+                .setTitle(status)
+                .setMessage(jsonFormatted)
+                .setPositiveButton("ACEPTAR") { dialog, _ ->
+                    dialog.dismiss()
+                    currentDialog = null
+                    activity.finish()
+                }
+                .setOnDismissListener {
                     currentDialog = null
                 }
                 .setCancelable(false)
@@ -221,6 +483,28 @@ object JsonParser {
     /**
      * Parsea cualquier respuesta de cierre
      */
+
+    private fun parseCierreResponseDetailed(data: Intent?): Triple<String, String, JSONObject> {
+        val extras = data?.extras ?: Bundle()
+        var jsonObject = JSONObject()
+
+        if (extras.containsKey("response")) {
+            val response = extras.getSerializable("response")
+            if (response != null) {
+                jsonObject = JSONObject(response.toString())
+            }
+        } else if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                jsonObject = JSONObject(jsonString)
+            }
+        }
+
+        val status = determineCierreStatus(jsonObject)
+        val formattedJson = jsonObject.toString(2)
+        return Triple(status, formattedJson, jsonObject)
+    }
+
     private fun parseCierreResponse(data: Intent?): Pair<String, String> {
         val extras = data?.extras ?: Bundle()
 
@@ -481,10 +765,29 @@ object JsonParser {
      * Procesa y muestra la respuesta de anulación en un diálogo
      * Uso: JsonParser.showAnulacionResult(activity, data)
      */
-    fun showAnulacionResult(activity: android.app.Activity, data: Intent?) {
+    fun showAnulacionResult(
+        activity: android.app.Activity,
+        data: Intent?,
+        requestData: String = ""
+    ) {
         currentDialog?.dismiss()
         try {
-            val (status, jsonFormatted) = parseAnulacionResponse(data)
+            val (status, jsonFormatted, jsonObject) = parseAnulacionResponseDetailed(data)
+
+            // Crear HistoryItem
+            val historyItem = HistoryItem(
+                commandType = "ANULACIÓN",
+                mode = "LIBRERÍA",
+                requestData = requestData,
+                responseData = jsonFormatted,
+                result = status,
+                responseCode = jsonObject.optString("ResponseCode", "-1"),
+                amount = jsonObject.optInt("Amount"),
+                ticketNumber = jsonObject.optString("Ticket"),
+                authorizationCode = jsonObject.optString("AuthorizationCode"),
+                functionCode = jsonObject.optInt("FunctionCode")
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
 
             currentDialog = android.app.AlertDialog.Builder(activity)
                 .setTitle(status)
@@ -504,6 +807,27 @@ object JsonParser {
             currentDialog = null
             showErrorDialog(activity, "Error: ${e.message}", data?.extras?.toString())
         }
+    }
+
+    private fun parseAnulacionResponseDetailed(data: Intent?): Triple<String, String, JSONObject> {
+        val extras = data?.extras ?: Bundle()
+        var jsonObject = JSONObject()
+
+        if (extras.containsKey("response")) {
+            val response = extras.getSerializable("response")
+            if (response != null) {
+                jsonObject = JSONObject(response.toString())
+            }
+        } else if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                jsonObject = JSONObject(jsonString)
+            }
+        }
+
+        val status = determineAnulacionStatus(jsonObject)
+        val formattedJson = jsonObject.toString(2)
+        return Triple(status, formattedJson, jsonObject)
     }
 
     /**
@@ -565,10 +889,29 @@ object JsonParser {
     /**
      * Procesa y muestra la respuesta de devolución en un diálogo
      */
-    fun showDevolucionResult(activity: android.app.Activity, data: Intent?) {
+    fun showDevolucionResult(
+        activity: android.app.Activity,
+        data: Intent?,
+        requestData: String = ""
+    ) {
         currentDialog?.dismiss()
         try {
-            val (status, jsonFormatted) = parseDevolucionResponse(data)
+            val (status, jsonFormatted, jsonObject) = parseDevolucionResponseDetailed(data)
+
+            // Crear HistoryItem
+            val historyItem = HistoryItem(
+                commandType = "DEVOLUCIÓN",
+                mode = "LIBRERÍA",
+                requestData = requestData,
+                responseData = jsonFormatted,
+                result = status,
+                responseCode = jsonObject.optString("ResponseCode", "-1"),
+                amount = jsonObject.optInt("Amount"),
+                ticketNumber = jsonObject.optString("Ticket"),
+                authorizationCode = jsonObject.optString("AuthorizationCode"),
+                functionCode = jsonObject.optInt("FunctionCode")
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
 
             currentDialog = android.app.AlertDialog.Builder(activity)
                 .setTitle(status)
@@ -577,7 +920,8 @@ object JsonParser {
                     dialog.dismiss()
                     currentDialog = null
                     activity.finish()
-                }.setOnDismissListener {
+                }
+                .setOnDismissListener {
                     currentDialog = null
                 }
                 .setCancelable(false)
@@ -590,8 +934,153 @@ object JsonParser {
     }
 
     /**
+     * Procesa y muestra la respuesta de anulación MC en un diálogo con formato ordenado
+     */
+    fun showAnulacionMCResult(
+        activity: android.app.Activity,
+        data: Intent?,
+        requestData: String = ""
+    ) {
+        currentDialog?.dismiss()
+        try {
+            val (status, jsonObject) = parseAnulacionMCResponseDetailed(data)
+
+            // Crear JSON ordenado específico para Anulación MC
+            val orderedJson = createAnulacionMCJson(jsonObject)
+
+            val jsonFormatted = orderedJson.toString(2)
+
+            // Guardar en historial
+            val historyItem = HistoryItem(
+                commandType = "ANULACIÓN MC",
+                mode = "JSON",
+                requestData = requestData,
+                responseData = jsonFormatted,
+                result = status,
+                responseCode = jsonObject.optString("ResponseCode", "-1"),
+                amount = jsonObject.optInt("Amount"),
+                ticketNumber = jsonObject.optString("Ticket"),
+                authorizationCode = jsonObject.optString("AuthorizationCode"),
+                functionCode = jsonObject.optInt("FunctionCode")
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
+
+            currentDialog = android.app.AlertDialog.Builder(activity)
+                .setTitle(status)
+                .setMessage(jsonFormatted)
+                .setPositiveButton("ACEPTAR") { dialog, _ ->
+                    dialog.dismiss()
+                    currentDialog = null
+                    activity.finish()
+                }
+                .setOnDismissListener {
+                    currentDialog = null
+                }
+                .setCancelable(false)
+                .show()
+
+        } catch (e: Exception) {
+            currentDialog = null
+            showErrorDialog(activity, "Error: ${e.message}", data?.extras?.toString())
+        }
+    }
+
+    /**
+     * Crea JSON ordenado específico para Anulación MC con todos los campos requeridos
+     */
+    private fun createAnulacionMCJson(jsonObject: JSONObject): JSONObject {
+        val orderedJson = JSONObject()
+
+        // Campos principales de respuesta
+        orderedJson.put("FunctionCode", jsonObject.optInt("FunctionCode", 122))
+        orderedJson.put("ResponseCode", jsonObject.optString("ResponseCode", "0"))
+        orderedJson.put("ResponseMessage", jsonObject.optString("ResponseMessage", "Aprobado"))
+        orderedJson.put("CommerceCode", jsonObject.optLong("CommerceCode", 0))
+        orderedJson.put("TerminalId", jsonObject.optString("TerminalId", ""))
+        orderedJson.put("AuthorizationCode", jsonObject.optString("AuthorizationCode", ""))
+        orderedJson.put("OperationID", jsonObject.optInt("OperationID", 0))
+        orderedJson.put("Success", jsonObject.optBoolean("Success", false))
+
+        // Token y datos de tarjeta
+        orderedJson.putOpt("TransToken", jsonObject.optString("TransToken"))
+        orderedJson.putOpt("ExpiryDate", jsonObject.optString("ExpiryDate"))
+        orderedJson.putOpt("IssuerId", jsonObject.optString("IssuerId"))
+        orderedJson.putOpt("Last4Digits", jsonObject.optString("Last4Digits"))
+
+        // Datos del comercio
+        orderedJson.putOpt("CommerceRut", jsonObject.optString("CommerceRut"))
+        orderedJson.putOpt("CommerceName", jsonObject.optString("CommerceName"))
+        orderedJson.putOpt("BranchName", jsonObject.optString("BranchName"))
+        orderedJson.putOpt("BranchAddress", jsonObject.optString("BranchAddress"))
+        orderedJson.putOpt("BranchDistrict", jsonObject.optString("BranchDistrict"))
+
+        return orderedJson
+    }
+
+    /**
+     * Parsea respuesta de Anulación MC y retorna el status y el JSONObject
+     */
+    private fun parseAnulacionMCResponseDetailed(data: Intent?): Pair<String, JSONObject> {
+        val extras = data?.extras ?: Bundle()
+        var jsonObject = JSONObject()
+
+        if (extras.containsKey("response")) {
+            val response = extras.getSerializable("response")
+            if (response != null) {
+                jsonObject = JSONObject(response.toString())
+            }
+        } else if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                jsonObject = JSONObject(jsonString)
+            }
+        }
+
+        val status = determineAnulacionMCStatus(jsonObject)
+        return Pair(status, jsonObject)
+    }
+
+    /**
+     * Determina el estado de la Anulación MC
+     */
+    private fun determineAnulacionMCStatus(jsonObject: JSONObject): String {
+        val responseCode = jsonObject.optString("ResponseCode", "-1")
+        val success = jsonObject.optBoolean("Success", false)
+        val responseMessage = jsonObject.optString("ResponseMessage", "")
+
+        return when {
+            success || responseCode == "0" || responseCode == "00" -> "ANULACIÓN MC APROBADA"
+            responseCode == "-1" && responseMessage.isNotEmpty() -> "ANULACIÓN MC RECHAZADA - $responseMessage"
+            responseCode == "-1" -> "ANULACIÓN MC RECHAZADA"
+            else -> "ANULACIÓN MC RECHAZADA (Código: $responseCode)"
+        }
+    }
+
+    /**
      * Parsea respuesta de devolución
      */
+
+    private fun parseDevolucionResponseDetailed(data: Intent?): Triple<String, String, JSONObject> {
+        val extras = data?.extras ?: Bundle()
+        var jsonObject = JSONObject()
+
+        if (extras.containsKey("response")) {
+            val response = extras.getSerializable("response")
+            if (response != null) {
+                jsonObject = JSONObject(response.toString())
+            }
+        } else if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                jsonObject = JSONObject(jsonString)
+            }
+        }
+
+        val status = determineDevolucionStatus(jsonObject)
+        val formattedJson = jsonObject.toString(2)
+        return Triple(status, formattedJson, jsonObject)
+    }
+
     private fun parseDevolucionResponse(data: Intent?): Pair<String, String> {
         val extras = data?.extras ?: Bundle()
 
@@ -628,42 +1117,178 @@ object JsonParser {
             else -> "DEVOLUCIÓN RECHAZADA"
         }
     }
+
+    /**
+     * Procesa y muestra la respuesta de devolución MC en un diálogo con formato ordenado
+     */
+    fun showDevolucionMCResult(
+        activity: android.app.Activity,
+        data: Intent?,
+        requestData: String = ""
+    ) {
+        currentDialog?.dismiss()
+        try {
+            val (status, jsonObject) = parseDevolucionMCResponseDetailed(data)
+
+            // Crear JSON ordenado específico para Devolución MC
+            val orderedJson = createDevolucionMCJson(jsonObject)
+
+            val jsonFormatted = orderedJson.toString(2)
+
+            // Guardar en historial
+            val historyItem = HistoryItem(
+                commandType = "DEVOLUCIÓN MC",
+                mode = "JSON",
+                requestData = requestData,
+                responseData = jsonFormatted,
+                result = status,
+                responseCode = jsonObject.optString("ResponseCode", "-1"),
+                amount = jsonObject.optInt("Amount"),
+                ticketNumber = jsonObject.optString("Ticket"),
+                authorizationCode = jsonObject.optString("AuthorizationCode"),
+                functionCode = jsonObject.optInt("FunctionCode")
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
+
+            currentDialog = android.app.AlertDialog.Builder(activity)
+                .setTitle(status)
+                .setMessage(jsonFormatted)
+                .setPositiveButton("ACEPTAR") { dialog, _ ->
+                    dialog.dismiss()
+                    currentDialog = null
+                    activity.finish()
+                }
+                .setOnDismissListener {
+                    currentDialog = null
+                }
+                .setCancelable(false)
+                .show()
+
+        } catch (e: Exception) {
+            currentDialog = null
+            showErrorDialog(activity, "Error: ${e.message}", data?.extras?.toString())
+        }
+    }
+
+    /**
+     * Crea JSON ordenado específico para Devolución MC
+     */
+    private fun createDevolucionMCJson(jsonObject: JSONObject): JSONObject {
+        val orderedJson = JSONObject()
+
+        // Campos principales de respuesta
+        orderedJson.put("FunctionCode", jsonObject.optInt("FunctionCode", 123))
+        orderedJson.put("ResponseCode", jsonObject.optString("ResponseCode", "0"))
+        orderedJson.put("ResponseMessage", jsonObject.optString("ResponseMessage", "Aprobado"))
+        orderedJson.put("CommerceCode", jsonObject.optLong("CommerceCode", 0))
+        orderedJson.put("TerminalId", jsonObject.optString("TerminalId", ""))
+        orderedJson.put("AuthorizationCode", jsonObject.optString("AuthorizationCode", ""))
+        orderedJson.put("OperationID", jsonObject.optInt("OperationID", 0))
+        orderedJson.put("Success", jsonObject.optBoolean("Success", false))
+        orderedJson.put("DateTime", jsonObject.optString("DateTime", ""))
+
+        // Token y datos de tarjeta
+        orderedJson.putOpt("TransToken", jsonObject.optString("TransToken"))
+        orderedJson.putOpt("ExpiryDate", jsonObject.optString("ExpiryDate"))
+        orderedJson.putOpt("IssuerId", jsonObject.optString("IssuerId"))
+        orderedJson.putOpt("Last4Digits", jsonObject.optString("Last4Digits"))
+
+        return orderedJson
+    }
+
+    /**
+     * Parsea respuesta de Devolución MC
+     */
+    private fun parseDevolucionMCResponseDetailed(data: Intent?): Pair<String, JSONObject> {
+        val extras = data?.extras ?: Bundle()
+        var jsonObject = JSONObject()
+
+        if (extras.containsKey("response")) {
+            val response = extras.getSerializable("response")
+            if (response != null) {
+                jsonObject = JSONObject(response.toString())
+            }
+        } else if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                jsonObject = JSONObject(jsonString)
+            }
+        }
+
+        val status = determineDevolucionMCStatus(jsonObject)
+        return Pair(status, jsonObject)
+    }
+
+    /**
+     * Determina el estado de la Devolución MC
+     */
+    private fun determineDevolucionMCStatus(jsonObject: JSONObject): String {
+        val responseCode = jsonObject.optString("ResponseCode", "-1")
+        val success = jsonObject.optBoolean("Success", false)
+        val responseMessage = jsonObject.optString("ResponseMessage", "")
+
+        return when {
+            success || responseCode == "0" || responseCode == "00" -> "DEVOLUCIÓN MC APROBADA"
+            responseCode == "-1" && responseMessage.isNotEmpty() -> "DEVOLUCIÓN MC RECHAZADA - $responseMessage"
+            responseCode == "-1" -> "DEVOLUCIÓN MC RECHAZADA"
+            else -> "DEVOLUCIÓN MC RECHAZADA (Código: $responseCode)"
+        }
+    }
+
     /**
      * Procesa y muestra la respuesta de duplicado en un diálogo
      */
-    fun showDuplicadoResult(activity: android.app.Activity, data: Intent?) {
+    fun showDuplicadoResult(
+        activity: android.app.Activity,
+        data: Intent?,
+        requestData: String = ""
+    ) {
         currentDialog?.dismiss()
         try {
             val (status, jsonObject) = parseDuplicadoResponseDetailed(data)
 
-            // Crear un nuevo JSONObject con el orden específico
             val orderedJson = JSONObject()
 
-            // Agregar campos en el orden solicitado
-            orderedJson.put("FunctionCode", jsonObject.optInt("FunctionCode", 109))
-            orderedJson.put("ResponseCode", jsonObject.optString("ResponseCode", "0"))
-            orderedJson.put("ResponseMessage", jsonObject.optString("ResponseMessage", "Aprobado"))
-            orderedJson.put("CommerceCode", jsonObject.optLong("CommerceCode", 550062700310))
-            orderedJson.put("TerminalId", jsonObject.optString("TerminalId", "ABC1234C"))
-            orderedJson.put("Ticket", jsonObject.optString("Ticket", "123456789012345678901234"))
-            orderedJson.put("AuthorizationCode", jsonObject.optString("AuthorizationCode", "XZ123456"))
-            orderedJson.put("Amount", jsonObject.optInt("Amount", 15000))
-            orderedJson.put("SharesNumber", jsonObject.optInt("SharesNumber", 3))
-            orderedJson.put("SharesAmount", jsonObject.optInt("SharesAmount", 5000))
-            orderedJson.put("Last4Digits", jsonObject.optInt("Last4Digits", 6677))
-            orderedJson.put("OperationId", jsonObject.optInt("OperationId", 60))
-            orderedJson.put("CardType", jsonObject.optString("CardType", "CR"))
-            orderedJson.put("AccountingDate", jsonObject.optString("AccountingDate", "2023-12-28 22:35:12"))
-            orderedJson.put("AccountNumber", jsonObject.optString("AccountNumber", "30000000000"))
-            orderedJson.put("CardBrand", jsonObject.optString("CardBrand", "AX"))
-            orderedJson.put("RealDate", jsonObject.optString("RealDate", "2023-12-28 22:35:12"))
-            orderedJson.put("EmployeeId", jsonObject.optInt("EmployeeId", 1))
-            orderedJson.put("Tip", jsonObject.optInt("Tip", 1500))
-            orderedJson.put("SaleType", jsonObject.optInt("SaleType", 1))
-            orderedJson.put("PosMode", jsonObject.optInt("PosMode", 1))
-            orderedJson.put("Cashback", jsonObject.optInt("Cashback", 1000))
+            // Campos - solo incluir si existen en el JSON original
+            jsonObject.optInt("FunctionCode").takeIf { it != 0 }?.let { orderedJson.put("FunctionCode", it) }
+            jsonObject.optString("ResponseCode").takeIf { it.isNotEmpty() }?.let { orderedJson.put("ResponseCode", it) }
+            jsonObject.optString("ResponseMessage").takeIf { it.isNotEmpty() }?.let { orderedJson.put("ResponseMessage", it) }
+            jsonObject.optLong("CommerceCode").takeIf { it != 0L }?.let { orderedJson.put("CommerceCode", it) }
+            jsonObject.optString("TerminalId").takeIf { it.isNotEmpty() }?.let { orderedJson.put("TerminalId", it) }
+            jsonObject.optString("Ticket").takeIf { it.isNotEmpty() }?.let { orderedJson.put("Ticket", it) }
+            jsonObject.optString("AuthorizationCode").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AuthorizationCode", it) }
+            jsonObject.optInt("Amount").takeIf { it != 0 }?.let { orderedJson.put("Amount", it) }
+            jsonObject.optInt("SharesNumber").takeIf { it != 0 }?.let { orderedJson.put("SharesNumber", it) }
+            jsonObject.optInt("SharesAmount").takeIf { it != 0 }?.let { orderedJson.put("SharesAmount", it) }
+            jsonObject.optInt("Last4Digits").takeIf { it != 0 }?.let { orderedJson.put("Last4Digits", it) }
+            jsonObject.optInt("OperationId").takeIf { it != 0 }?.let { orderedJson.put("OperationId", it) }
+            jsonObject.optString("CardType").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CardType", it) }
+            jsonObject.optString("AccountingDate").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AccountingDate", it) }
+            jsonObject.optString("AccountNumber").takeIf { it.isNotEmpty() }?.let { orderedJson.put("AccountNumber", it) }
+            jsonObject.optString("CardBrand").takeIf { it.isNotEmpty() }?.let { orderedJson.put("CardBrand", it) }
+            jsonObject.optString("RealDate").takeIf { it.isNotEmpty() }?.let { orderedJson.put("RealDate", it) }
+            jsonObject.optInt("EmployeeId").takeIf { it != 0 }?.let { orderedJson.put("EmployeeId", it) }
+            jsonObject.optInt("Tip").takeIf { it != 0 }?.let { orderedJson.put("Tip", it) }
+            jsonObject.optInt("SaleType").takeIf { it != 0 }?.let { orderedJson.put("SaleType", it) }
+            jsonObject.optInt("PosMode").takeIf { it != 0 }?.let { orderedJson.put("PosMode", it) }
+            jsonObject.optInt("Cashback").takeIf { it != 0 }?.let { orderedJson.put("Cashback", it) }
 
-            val jsonFormatted = orderedJson.toString(2)
+            val jsonFormatted = if (orderedJson.length() > 0) orderedJson.toString(2) else "{}"
+
+            // Crear HistoryItem
+            val historyItem = HistoryItem(
+                commandType = "DUPLICADO",
+                mode = "LIBRERÍA",
+                requestData = requestData,
+                responseData = jsonFormatted,
+                result = status,
+                responseCode = jsonObject.optString("ResponseCode").takeIf { it.isNotEmpty() } ?: "-1",
+                amount = jsonObject.optInt("Amount"),
+                ticketNumber = jsonObject.optString("Ticket").takeIf { it.isNotEmpty() },
+                authorizationCode = jsonObject.optString("AuthorizationCode").takeIf { it.isNotEmpty() },
+                functionCode = jsonObject.optInt("FunctionCode").takeIf { it != 0 }
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
 
             currentDialog = android.app.AlertDialog.Builder(activity)
                 .setTitle(status)
@@ -723,13 +1348,29 @@ object JsonParser {
             else -> "DUPLICADO RECHAZADO (Codigo: $responseCode)"
         }
     }
+
     /**
      * Procesa y muestra la respuesta de detalle de venta en un diálogo
      */
-    fun showDetalleVentaResult(activity: android.app.Activity, data: Intent?) {
+    fun showDetalleVentaResult(activity: android.app.Activity, data: Intent?, requestData: String = "") {
         currentDialog?.dismiss()
         try {
-            val (status, jsonFormatted) = parseDetalleVentaResponse(data)
+            val (status, jsonFormatted, jsonObject) = parseDetalleVentaResponseDetailed(data)
+
+            // Crear y guardar en historial
+            val historyItem = HistoryItem(
+                commandType = "DETALLE VENTA",
+                mode = "LIBRERÍA",
+                requestData = requestData,
+                responseData = jsonFormatted,
+                result = status,
+                responseCode = jsonObject.optString("ResponseCode", "-1"),
+                amount = jsonObject.optInt("Amount"),
+                ticketNumber = jsonObject.optString("Ticket"),
+                authorizationCode = jsonObject.optString("AuthorizationCode"),
+                functionCode = jsonObject.optInt("FunctionCode")
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
 
             currentDialog = android.app.AlertDialog.Builder(activity)
                 .setTitle(status)
@@ -754,6 +1395,28 @@ object JsonParser {
     /**
      * Parsea respuesta de detalle de venta
      */
+
+    private fun parseDetalleVentaResponseDetailed(data: Intent?): Triple<String, String, JSONObject> {
+        val extras = data?.extras ?: Bundle()
+        var jsonObject = JSONObject()
+
+        if (extras.containsKey("response")) {
+            val response = extras.getSerializable("response")
+            if (response != null) {
+                jsonObject = JSONObject(response.toString())
+            }
+        } else if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                jsonObject = JSONObject(jsonString)
+            }
+        }
+
+        val status = determineDetalleVentaStatus(jsonObject)
+        val formattedJson = jsonObject.toString(2)
+        return Triple(status, formattedJson, jsonObject)
+    }
+
     private fun parseDetalleVentaResponse(data: Intent?): Pair<String, String> {
         val extras = data?.extras ?: Bundle()
 
@@ -802,11 +1465,155 @@ object JsonParser {
 
         return when {
             responseCode == "0" || responseCode == "00" ||
-                    responseMessage.contains("Aprobado", ignoreCase = true) -> "DETALLE DE VENTA EXITOSO"
+                    responseMessage.contains(
+                        "Aprobado",
+                        ignoreCase = true
+                    ) -> "DETALLE DE VENTA EXITOSO"
+
             jsonObject.has("error") -> "ERROR EN DETALLE DE VENTA"
             else -> "DETALLE DE VENTA RECHAZADO"
         }
     }
+
+    /**
+     * Procesa y muestra la respuesta de detalle de ventas MC
+     */
+    fun showDetalleMCResult(
+        activity: android.app.Activity,
+        data: Intent?,
+        requestData: String = ""
+    ) {
+        currentDialog?.dismiss()
+        try {
+            val (status, jsonObject) = parseDetalleMCResponseDetailed(data)
+
+            // Crear JSON ordenado para Detalle MC
+            val orderedJson = createDetalleMCJson(jsonObject)
+
+            val jsonFormatted = orderedJson.toString(2)
+
+            // Guardar en historial
+            val historyItem = HistoryItem(
+                commandType = "DETALLE MC",
+                mode = "JSON",
+                requestData = requestData,
+                responseData = jsonFormatted,
+                result = status,
+                responseCode = jsonObject.optString("ResponseCode", "-1"),
+                amount = null,
+                ticketNumber = null,
+                authorizationCode = null,
+                functionCode = jsonObject.optInt("FunctionCode")
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
+
+            currentDialog = android.app.AlertDialog.Builder(activity)
+                .setTitle(status)
+                .setMessage(jsonFormatted)
+                .setPositiveButton("ACEPTAR") { dialog, _ ->
+                    dialog.dismiss()
+                    currentDialog = null
+                    activity.finish()
+                }
+                .setOnDismissListener {
+                    currentDialog = null
+                }
+                .setCancelable(false)
+                .show()
+
+        } catch (e: Exception) {
+            currentDialog = null
+            showErrorDialog(activity, "Error: ${e.message}", data?.extras?.toString())
+        }
+    }
+
+    /**
+     * Crea JSON ordenado para Detalle MC con formato legible
+     */
+    private fun createDetalleMCJson(jsonObject: JSONObject): JSONObject {
+        val orderedJson = JSONObject()
+
+        // Campos principales
+        orderedJson.put("FunctionCode", jsonObject.optInt("FunctionCode", 133))
+        orderedJson.put("ResponseCode", jsonObject.optString("ResponseCode", "0"))
+        orderedJson.put("ResponseMessage", jsonObject.optString("ResponseMessage", "Aprobado"))
+
+        // Procesar SaleDetails si existe
+        if (jsonObject.has("SaleDetails")) {
+            val saleDetailsArray = jsonObject.getJSONArray("SaleDetails")
+            val formattedArray = JSONArray()
+
+            for (i in 0 until saleDetailsArray.length()) {
+                val saleItem = saleDetailsArray.getJSONObject(i)
+                val formattedItem = JSONObject()
+
+                // Ordenar campos de cada venta
+                formattedItem.put("OperationId", saleItem.optInt("Operationld", 0))
+                formattedItem.put("Amount", saleItem.optInt("Amount", 0))
+                formattedItem.put("AuthorizationCode", saleItem.optString("AuthorizationCode", ""))
+                formattedItem.put("CardBrand", saleItem.optString("CardBrand", ""))
+                formattedItem.put("CardType", saleItem.optString("CardType", ""))
+                formattedItem.put("Last4Digits", saleItem.optString("Last4Digits", ""))
+                formattedItem.put("AccountingDate", saleItem.optString("AccountingDate", ""))
+                formattedItem.put("RealDate", saleItem.optString("RealDate", ""))
+                formattedItem.put("CommerceName", saleItem.optString("CommerceName", ""))
+                formattedItem.put("CommerceRut", saleItem.optString("CommerceRut", ""))
+                formattedItem.put("BranchName", saleItem.optString("BranchName", ""))
+                formattedItem.put("TerminalId", saleItem.optString("Terminalld", ""))
+                formattedItem.put("TransToken", saleItem.optString("TransToken", ""))
+                formattedItem.put("EntryMode", saleItem.optString("EntryMode", ""))
+                formattedItem.put("ExpiryDate", saleItem.optString("ExpiryDate", ""))
+                formattedItem.put("Aid", saleItem.optString("Aid", ""))
+                formattedItem.put("Bin", saleItem.optString("Bin", ""))
+
+                formattedArray.put(formattedItem)
+            }
+
+            orderedJson.put("SaleDetails", formattedArray)
+            orderedJson.put("TotalVentas", formattedArray.length())
+        }
+
+        return orderedJson
+    }
+
+    /**
+     * Parsea respuesta de Detalle MC
+     */
+    private fun parseDetalleMCResponseDetailed(data: Intent?): Pair<String, JSONObject> {
+        val extras = data?.extras ?: Bundle()
+        var jsonObject = JSONObject()
+
+        if (extras.containsKey("response")) {
+            val response = extras.getSerializable("response")
+            if (response != null) {
+                jsonObject = JSONObject(response.toString())
+            }
+        } else if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                jsonObject = JSONObject(jsonString)
+            }
+        }
+
+        val status = determineDetalleMCStatus(jsonObject)
+        return Pair(status, jsonObject)
+    }
+
+    /**
+     * Determina el estado del Detalle MC
+     */
+    private fun determineDetalleMCStatus(jsonObject: JSONObject): String {
+        val responseCode = jsonObject.optString("ResponseCode", "-1")
+        val responseMessage = jsonObject.optString("ResponseMessage", "")
+
+        return when {
+            responseCode == "0" || responseCode == "00" -> "DETALLE MC EXITOSO"
+            jsonObject.has("SaleDetails") && jsonObject.getJSONArray("SaleDetails").length() > 0 -> "DETALLE MC EXITOSO"
+            responseCode == "-1" && responseMessage.isNotEmpty() -> "DETALLE MC RECHAZADO - $responseMessage"
+            else -> "DETALLE MC RECHAZADO"
+        }
+    }
+
 
     /**
      * Procesa y muestra la respuesta de cierre en un diálogo (versión completa)
@@ -882,14 +1689,158 @@ object JsonParser {
         }
     }
 
+    fun showMainPosDataResult(
+        activity: android.app.Activity,
+        data: Intent?,
+        requestData: String = "",
+        shouldFinishActivity: Boolean = true
+    ) {
+        currentDialog?.dismiss()
+        try {
+            val (status, jsonFormatted, jsonObject) = parseMainPosDataResponseDetailed(data)
+
+            val historyItem = HistoryItem(
+                commandType = "MAIN POS DATA",
+                mode = "JSON",
+                requestData = requestData,
+                responseData = jsonFormatted,
+                result = status,
+                responseCode = jsonObject.optString("ResponseCode", "-1"),
+                amount = null,
+                ticketNumber = null,
+                authorizationCode = null,
+                functionCode = jsonObject.optInt("FunctionCode")
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
+
+            currentDialog = android.app.AlertDialog.Builder(activity)
+                .setTitle(status)
+                .setMessage(jsonFormatted)
+                .setPositiveButton("ACEPTAR") { dialog, _ ->
+                    dialog.dismiss()
+                    currentDialog = null
+                    if (shouldFinishActivity) {
+                        activity.finish()
+                    }
+                }
+                .setOnDismissListener {
+                    currentDialog = null
+                }
+                .setCancelable(false)
+                .show()
+
+        } catch (e: Exception) {
+            currentDialog = null
+            showErrorDialog(activity, "Error: ${e.message}", data?.extras?.toString())
+        }
+    }
+
+    private fun parseMainPosDataResponseDetailed(data: Intent?): Triple<String, String, JSONObject> {
+        val extras = data?.extras ?: Bundle()
+        var jsonObject = JSONObject()
+
+        if (extras.containsKey("response")) {
+            // Usar getSerializable con la nueva API
+            val response = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                extras.getSerializable("response", java.io.Serializable::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                extras.getSerializable("response")
+            }
+
+            if (response != null) {
+                val originalJson = JSONObject(response.toString())
+
+                // Crear JSON ordenado
+                val orderedJson = JSONObject()
+
+                // 1. PRIMERO los campos principales
+                orderedJson.put("FunctionCode", originalJson.optInt("FunctionCode"))
+                orderedJson.put("ResponseCode", originalJson.optString("ResponseCode"))
+                orderedJson.put("ResponseMessage", originalJson.optString("ResponseMessage"))
+
+                // 2. DESPUÉS CommerceData como ARRAY
+                if (originalJson.has("CommerceData")) {
+                    val commerceArray = JSONArray()
+
+                    // Obtener los datos de CommerceData (ya sea objeto o array)
+                    val commerceDataObj = if (originalJson.get("CommerceData") is JSONObject) {
+                        originalJson.getJSONObject("CommerceData")
+                    } else {
+                        val array = originalJson.getJSONArray("CommerceData")
+                        if (array.length() > 0) array.getJSONObject(0) else JSONObject()
+                    }
+
+                    // Crear el objeto ordenado según tu ejemplo
+                    val orderedCommerceItem = JSONObject()
+                    orderedCommerceItem.put("LegalName", commerceDataObj.optString("LegalName"))
+                    orderedCommerceItem.put("CommerceNumber", commerceDataObj.optString("CommerceNumber"))
+                    orderedCommerceItem.put("CommerceRut", commerceDataObj.optString("CommerceRut"))
+                    orderedCommerceItem.put("BranchNumber", commerceDataObj.optString("BranchNumber"))
+                    orderedCommerceItem.put("BranchName", commerceDataObj.optString("BranchName"))
+                    orderedCommerceItem.put("LittleBranchName", commerceDataObj.optString("LittleBranchName"))
+                    orderedCommerceItem.put("BranchAddress", commerceDataObj.optString("BranchAddress"))
+                    orderedCommerceItem.put("BranchDistrict", commerceDataObj.optString("BranchDistrict"))
+                    orderedCommerceItem.put("TerminalId", commerceDataObj.optString("TerminalId"))
+                    orderedCommerceItem.put("SerialNumber", commerceDataObj.optString("SerialNumber"))
+
+                    commerceArray.put(orderedCommerceItem)
+                    orderedJson.put("CommerceData", commerceArray)
+                }
+
+                jsonObject = orderedJson
+            }
+        } else if (extras.containsKey("params")) {
+            val jsonString = extras.getString("params", "")
+            if (jsonString.isNotEmpty()) {
+                jsonObject = JSONObject(jsonString)
+            }
+        }
+
+        val status = determineMainPosDataStatus(jsonObject)
+        val formattedJson = jsonObject.toString(2)
+        return Triple(status, formattedJson, jsonObject)
+    }
+
+    private fun determineMainPosDataStatus(jsonObject: JSONObject): String {
+        val responseCode = jsonObject.optString("ResponseCode", "-1")
+        val responseMessage = jsonObject.optString("ResponseMessage", "")
+
+        return when {
+            responseCode == "0" || responseCode == "00" -> "CONSULTA EXITOSA"
+            responseMessage.contains("Aprobado", ignoreCase = true) -> "CONSULTA EXITOSA"
+            else -> "CONSULTA FALLIDA"
+        }
+    }
     /**
      * Procesa y muestra la respuesta de impresión en un diálogo
      */
-    fun showPrintServiceResult(activity: android.app.Activity, data: Intent?) {
+    fun showPrintServiceResult(
+        activity: android.app.Activity,
+        data: Intent?,
+        requestData: String = ""
+    ) {
         currentDialog?.dismiss()
         try {
             val resultData = data?.getStringExtra("resultData") ?: "{}"
             val formattedJson = formatJson(resultData)
+            val jsonObject = JSONObject(resultData)
+
+            // Crear HistoryItem
+            val historyItem = HistoryItem(
+                commandType = "IMPRESIÓN",
+                mode = "SERVICIO",
+                requestData = requestData,
+                responseData = formattedJson,
+                result = determinePrintServiceStatus(jsonObject),
+                responseCode = jsonObject.optString("ResponseCode", "-1"),
+                amount = null,
+                ticketNumber = null,
+                authorizationCode = null,
+                functionCode = jsonObject.optInt("FunctionCode")
+
+            )
+            HistoryManager.saveTransaction(activity, historyItem)
 
             currentDialog = android.app.AlertDialog.Builder(activity)
                 .setTitle("Resultado Impresión")

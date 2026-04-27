@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -15,7 +19,7 @@
 
         <!-- Splash Screen Activity (primera pantalla) -->
         <activity
-            android:name=".SplashActivity"
+            android:name=".activitys.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
@@ -26,43 +30,96 @@
 
         <!-- MainActivity (dashboard principal) -->
         <activity
-            android:name=".MainActivity"
+            android:name=".activitys.MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SimuladorAppToApp" />
+        <activity
+            android:name=".activitys.ConfigActivity"
             android:exported="false"
             android:theme="@style/Theme.SimuladorAppToApp" />
 
         <!-- VentaActivity -->
         <activity
-            android:name=".VentaActivity"
+            android:name=".activitys.VentaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".VentaMCActivity"
+            android:name=".activitys.MultiComercioActivitys.VentaMCActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".CommerceDataActivity"
+            android:name=".activitys.CommerceDataActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".DetalleVentaActivity"
+            android:name=".activitys.DetalleVentaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".AnulacionActivity"
+            android:name=".activitys.AnulacionActivity"
             android:exported="false" />
         <activity
-            android:name=".DevolucionActivity"
+            android:name=".activitys.DevolucionActivity"
             android:exported="false" />
         <activity
-            android:name=".DuplicadoActivity"
+            android:name=".activitys.DuplicadoActivity"
             android:exported="false" />
         <activity
-            android:name=".CierreActivity"
+            android:name=".activitys.CierreActivity"
             android:exported="false" />
         <activity
-            android:name=".PrintServicesActivity"
+            android:name=".activitys.PrintServicesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".activitys.HistorialActivitys.HistoryActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"  />
+        <activity
+            android:name=".activitys.HistorialActivitys.HistoryDetailActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.MainPosdataActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.ScannerServiceActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.MultiComercioActivitys.MulticommerceActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.AnulacionMCActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.DevolucionMCActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.DetalleMCActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.C2CModeActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.LogcatActivity"
+            android:exported="false"
+            android:label="Logcat Viewer"
+            android:parentActivityName=".activitys.ConfigActivity" />
+
+        <receiver
+            android:name=".receivers.ScannerServiceReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="cl.getnet.c2cservice.action.RESPONSE" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

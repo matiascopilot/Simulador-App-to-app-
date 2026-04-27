@@ -4,13 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/background_light"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
     <!-- Header optimizado -->
 
-    <!-- 🔥 SECCIÓN STICKY - FUERA DEL SCROLLVIEW -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,10 +42,11 @@
                     app:cardCornerRadius="@dimen/corner_radius_small">
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/icono_app_to_app_sim_new" />
+                        android:id="@+id/logo_app_to_app"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/icono_app_to_app_sim_new" />
                 </androidx.cardview.widget.CardView>
 
                 <TextView
@@ -55,7 +55,7 @@
                     android:layout_marginStart="@dimen/spacing_medium"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:text="Simulador App To App"
+                    android:text="@string/simulador_app_to_app"
                     android:textColor="@color/text_primary"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -69,38 +69,55 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingStart="@dimen/screen_padding_horizontal"
-        android:paddingEnd="@dimen/screen_padding_horizontal"
-        android:paddingTop="@dimen/spacing_small"
-        android:paddingBottom="@dimen/spacing_small"
         android:background="@color/background_light"
-        android:elevation="0dp">
+        android:elevation="0dp"
+        android:gravity="center_vertical"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/screen_padding_horizontal"
+        android:paddingTop="@dimen/spacing_small"
+        android:paddingEnd="@dimen/screen_padding_horizontal"
+        android:paddingBottom="@dimen/spacing_small">
 
-        <!-- TextView del título -->
+        <!-- TextView del título (clickeable) con área ampliada -->
+
+        <!-- Flechas (cerca del título) -->
         <TextView
             android:id="@+id/tvSectionTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
             android:letterSpacing="0.1"
+            android:minHeight="12dp"
             android:paddingStart="@dimen/spacing_xsmall"
-            android:paddingEnd="@dimen/spacing_xsmall"
+            android:paddingEnd="@dimen/spacing_medium"
             android:text="@string/section_commands"
             android:textAllCaps="true"
             android:textColor="@color/text_secondary"
             android:textSize="@dimen/text_size_xsmall"
             android:textStyle="bold" />
 
-        <!-- ImageButton a la derecha -->
         <ImageButton
             android:id="@+id/btn_swap_commands"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/arrows"
+            android:layout_height="48dp"
+            android:layout_marginEnd="@dimen/spacing_large"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="@dimen/spacing_small" />
+            android:padding="@dimen/spacing_small"
+            android:src="@drawable/arrows" />
+
+        <!-- Tuerca (máxima derecha) -->
+        <ImageButton
+            android:id="@+id/btn_config"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="@dimen/spacing_small"
+            android:src="@drawable/ic_config" />
 
     </LinearLayout>
 
@@ -202,7 +219,7 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/cardSaleMC"
+                    android:id="@+id/cardMulticommerce"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/card_spacing"
@@ -232,16 +249,16 @@
                                 android:layout_width="@dimen/command_icon_size"
                                 android:layout_height="@dimen/command_icon_size"
                                 android:elevation="0dp"
-                                app:cardBackgroundColor="@color/orange_light"
+                                app:cardBackgroundColor="@color/text_getnet"
                                 app:cardCornerRadius="@dimen/corner_radius_small">
 
                                 <ImageView
-                                    android:layout_width="35dp"
-                                    android:layout_height="30dp"
+                                    android:layout_width="40dp"
+                                    android:layout_height="35dp"
                                     android:layout_gravity="center"
                                     android:contentDescription="Venta multicomercio"
-                                    android:src="@drawable/ventamc"
-                                    android:tint="@color/orange_dark" />
+                                    android:src="@drawable/multicomerce"
+                                     />
                             </androidx.cardview.widget.CardView>
 
                             <LinearLayout
@@ -255,10 +272,9 @@
                                     android:layout_height="wrap_content"
                                     android:ellipsize="end"
                                     android:maxLines="1"
-                                    android:text="Venta MC"
+                                    android:text="Multi-Comercio A2A"
                                     android:textColor="@color/text_primary"
-                                    android:textSize="@dimen/text_size_medium"
-                                     />
+                                    android:textSize="@dimen/text_size_medium" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -611,7 +627,7 @@
                                     android:layout_height="30dp"
                                     android:layout_gravity="center"
                                     android:contentDescription="@string/icon_batch"
-                                    android:src="@drawable/cierre"
+                                    android:src="@drawable/print"
                                     android:tint="@color/emerald_dark" />
                             </androidx.cardview.widget.CardView>
 
@@ -684,7 +700,7 @@
                                     android:layout_height="30dp"
                                     android:layout_gravity="center"
                                     android:contentDescription="@string/print_service"
-                                    android:src="@drawable/print"
+                                    android:src="@drawable/impresion"
                                     android:tint="@color/cyan_dark" />
                             </androidx.cardview.widget.CardView>
 

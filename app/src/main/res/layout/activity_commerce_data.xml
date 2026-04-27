@@ -134,6 +134,29 @@
                     android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- NUEVO BOTÓN PARA TRAER DATOS -->
+            <Button
+                android:id="@+id/btnTraerDatos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TRAER DATOS DEL COMERCIO HIJO"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nota: El botón 'TRAER DATOS' obtendrá los parámetros del comercio hijo mediante GET PARAMS MC y reemplazará los datos actuales"
+                android:textSize="12sp"
+                android:textColor="@android:color/darker_gray"
+                android:padding="8dp"
+                android:background="@android:color/background_light"
+                android:layout_marginTop="8dp" />
+
         </LinearLayout>
     </ScrollView>
 

@@ -1,12 +1,16 @@
-package cl.ione.simuladorapptoapp
+package cl.ione.simuladorapptoapp.activitys
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import cl.ione.simuladorapptoapp.R
+import cl.ione.simuladorapptoapp.activitys.MultiComercioActivitys.VentaMCActivity
 import cl.ione.simuladorapptoapp.databinding.ActivityCommerceDataBinding
-import cl.ione.simuladorapptoapp.components.RequestDialog
 import org.json.JSONObject
 
 class CommerceDataActivity : AppCompatActivity() {
@@ -14,6 +18,11 @@ class CommerceDataActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCommerceDataBinding
     private var isCommandsMode: Boolean = false
     private var currentRequestJson: String = "" // Para guardar el request actual
+    private val REQUEST_CODE_GET_PARAMS = 3452 // Código para GET PARAMS MC
+
+    // Datos temporales para el RUT y serial number
+    private var tempRut: String = ""
+    private var tempSerialNumber: String = ""
 
     private val startVentaMC = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val intent = Intent(this, MainActivity::class.java)
@@ -33,9 +42,10 @@ class CommerceDataActivity : AppCompatActivity() {
 
         setupHeader()
         setupFooterButtons()
+        setupTraerDatosButton() // Nuevo método
         setDefaultValues()
-        configurarActualizacionRequest() // Configurar actualización automática
-        actualizarRequestJson() // Generar request inicial
+        configurarActualizacionRequest()
+        actualizarRequestJson()
     }
 
     private fun setupHeader() {
@@ -48,10 +58,9 @@ class CommerceDataActivity : AppCompatActivity() {
         binding.header.setup(
             title = titulo,
             showBackButton = true,
-            showRequestButton = true, // Mostrar botón de request
+            showRequestButton = true,
             onBackClick = { finish() },
             onRequestClick = {
-                // Mostrar el request actual
                 if (currentRequestJson.isNotEmpty()) {
                     binding.header.showRequestJson(currentRequestJson, "REQUEST COMERCIO DATOS")
                 } else {
@@ -74,15 +83,159 @@ class CommerceDataActivity : AppCompatActivity() {
         )
     }
 
-    private fun setDefaultValues() {
-        binding.etRut.setText("7055871-8")
-        binding.etDireccion.setText("Las bellotas 199")
-        binding.etCiudad.setText("Santiago")
-        binding.etRazonSocial.setText("Movired")
-        binding.etNombreFantasia.setText("Simulador A2A MC")
+    // NUEVO MÉTODO: Configurar el botón "TRAER DATOS"
+    private fun setupTraerDatosButton() {
+        binding.btnTraerDatos.setOnClickListener {
+            mostrarDialogoIngresarRut()
+        }
     }
 
-    // Configurar actualización automática cuando cambian los campos
+    // NUEVO MÉTODO: Mostrar diálogo para ingresar RUT y serial number
+    private fun mostrarDialogoIngresarRut() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_get_params_input, null)
+        val etRutInput = dialogView.findViewById<EditText>(R.id.etRutInput)
+        val etSerialInput = dialogView.findViewById<EditText>(R.id.etSerialInput)
+
+        // Valores por defecto
+        etRutInput.setText("09091125-2")
+        etSerialInput.setText("23C4KD4F9626")
+
+        AlertDialog.Builder(this)
+            .setTitle("Obtener Parámetros del Comercio")
+            .setMessage("Ingrese los datos para obtener los parámetros del comercio hijo:")
+            .setView(dialogView)
+            .setPositiveButton("OBTENER") { _, _ ->
+                val rut = etRutInput.text.toString()
+                val serial = etSerialInput.text.toString()
+
+                if (rut.isNotEmpty() && serial.isNotEmpty()) {
+                    tempRut = rut
+                    tempSerialNumber = serial
+                    enviarGetParamsMC(rut, serial)
+                } else {
+                    Toast.makeText(this, "Debe ingresar RUT y Serial Number", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("CANCELAR", null)
+            .show()
+    }
+
+    // NUEVO MÉTODO: Enviar solicitud GET PARAMS MC
+    private fun enviarGetParamsMC(rut: String, serialNumber: String) {
+        try {
+            // Crear el JSON de solicitud según el formato proporcionado
+            val paramsMcRequest = JSONObject().apply {
+                put("typeApp", 0) // Usamos typeApp 0 por defecto
+                put("rutCommerceSon", rut)
+                put("serialNumber", serialNumber)
+                put("command", 127) // Comando 127 para PARAMETROS_MULTICOMERCIO
+            }.toString()
+
+            Log.d("COMMERCE_DATA", "📤 Enviando solicitud GET PARAMS MC:")
+            Log.d("COMMERCE_DATA", "Request JSON: $paramsMcRequest")
+
+            // Crear el Intent para el servicio de parámetros multicomercio
+            val intent = Intent("cl.getnet.c2cservice.action.PARAMS_MC_REQUEST")
+            intent.putExtra("params", paramsMcRequest)
+            intent.putExtra("urlToResponse", "cl.getnet.c2cservice.action.PARAMS_MC_RESPONSE")
+
+            // Usar startActivityForResult para recibir la respuesta
+            startActivityForResult(intent, REQUEST_CODE_GET_PARAMS)
+
+        } catch (e: Exception) {
+            Log.e("COMMERCE_DATA", "Error al enviar solicitud: ${e.message}", e)
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    // NUEVO MÉTODO: Procesar la respuesta de GET PARAMS MC
+    private fun procesarRespuestaParamsMC(data: Intent?) {
+        try {
+            // Obtener la respuesta del intent
+            val responseJson = data?.getStringExtra("response") ?:
+            data?.getStringExtra("params") ?:
+            "{}"
+
+            Log.d("COMMERCE_DATA", "📥 Respuesta recibida:")
+            Log.d("COMMERCE_DATA", responseJson)
+
+            // Parsear la respuesta JSON
+            val jsonResponse = JSONObject(responseJson)
+
+            // Extraer los datos del comercio hijo
+            val rut = jsonResponse.optString("rutCommerceSon", tempRut)
+            val direccion = jsonResponse.optString("branchAddress", "Dirección no disponible")
+            val ciudad = jsonResponse.optString("branchDistrict", "Ciudad no disponible")
+            val razonSocial = jsonResponse.optString("legalName", "Razón Social no disponible")
+            val nombreFantasia = jsonResponse.optString("branchName", "Nombre no disponible")
+
+            // REEMPLAZAR los datos en las casillas
+            binding.etRut.setText(rut)
+            binding.etDireccion.setText(direccion)
+            binding.etCiudad.setText(ciudad)
+            binding.etRazonSocial.setText(razonSocial)
+            binding.etNombreFantasia.setText(nombreFantasia)
+
+            // Mostrar mensaje de éxito
+            Toast.makeText(this, "✅ Datos obtenidos y cargados correctamente", Toast.LENGTH_LONG).show()
+
+            // Actualizar el request JSON
+            actualizarRequestJson()
+
+            // Mostrar los datos obtenidos en un diálogo informativo
+            val mensaje = """
+                ✅ DATOS ACTUALIZADOS
+                
+                Se han reemplazado los datos del comercio hijo:
+                
+                • RUT: $rut
+                • Dirección: $direccion
+                • Ciudad: $ciudad
+                • Razón Social: $razonSocial
+                • Nombre Fantasía: $nombreFantasia
+            """.trimIndent()
+
+            AlertDialog.Builder(this)
+                .setTitle("Parámetros Obtenidos")
+                .setMessage(mensaje)
+                .setPositiveButton("ACEPTAR", null)
+                .show()
+
+        } catch (e: Exception) {
+            Log.e("COMMERCE_DATA", "Error procesando respuesta: ${e.message}", e)
+            Toast.makeText(this, "Error procesando respuesta: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_CODE_GET_PARAMS) {
+            when (resultCode) {
+                RESULT_OK -> {
+                    procesarRespuestaParamsMC(data)
+                }
+                RESULT_CANCELED -> {
+                    Toast.makeText(this, "Operación cancelada", Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    val errorMsg = data?.getStringExtra("error") ?:
+                    data?.getStringExtra("message") ?:
+                    "Error desconocido"
+                    Toast.makeText(this, "Error: $errorMsg", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    private fun setDefaultValues() {
+        binding.etRut.setText("09091125-2")
+        binding.etDireccion.setText("AGUSTINAS 1127")
+        binding.etCiudad.setText("Santiago")
+        binding.etRazonSocial.setText("Eduardo ione")
+        binding.etNombreFantasia.setText("EDUARDO IONE")
+    }
+
     private fun configurarActualizacionRequest() {
         val textWatcher = object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -99,7 +252,6 @@ class CommerceDataActivity : AppCompatActivity() {
         binding.etNombreFantasia.addTextChangedListener(textWatcher)
     }
 
-    // Actualizar el JSON del request con los valores actuales
     private fun actualizarRequestJson() {
         try {
             val jsonObject = JSONObject().apply {

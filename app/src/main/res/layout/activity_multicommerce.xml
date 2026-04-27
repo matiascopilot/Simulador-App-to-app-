@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <!-- Header Component (reutilizable) -->
+    <cl.ione.simuladorapptoapp.components.Header
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+
+    <!-- Main Content Scrollable -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:paddingStart="@dimen/screen_padding_horizontal"
+        android:paddingEnd="@dimen/screen_padding_horizontal"
+        android:paddingBottom="@dimen/bottom_padding_large">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/spacing_medium">
+
+            <!-- Venta Multicomercio -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardVentaMC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/card_spacing"
+                android:clickable="true"
+                android:elevation="2dp"
+                android:layout_marginTop="@dimen/spacing_xxsmall"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:stateListAnimator="@null"
+                app:cardBackgroundColor="@color/card_background"
+                app:cardCornerRadius="@dimen/corner_radius_medium">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/card_padding_medium">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="@dimen/command_icon_size"
+                        android:layout_height="@dimen/command_icon_size"
+                        android:elevation="0dp"
+                        app:cardBackgroundColor="@color/orange_light"
+                        app:cardCornerRadius="@dimen/corner_radius_small">
+
+                        <ImageView
+                            android:layout_width="35dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="Venta Multicomercio"
+                            android:src="@drawable/ventamc"
+                            android:tint="@color/orange_dark" />
+                    </androidx.cardview.widget.CardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_medium"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Venta Multi-comercio"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_medium"
+                           />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xxsmall"
+                            android:ellipsize="end"
+                            android:maxLines="2"
+                            android:text="Realizar venta MC"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small" />
+                    </LinearLayout>
+
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+
+
+            <!-- Anulación MC -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardVoidMC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/card_spacing"
+                android:clickable="true"
+                android:elevation="2dp"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:stateListAnimator="@null"
+                app:cardBackgroundColor="@color/card_background"
+                app:cardCornerRadius="@dimen/corner_radius_medium">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/card_padding_medium">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="@dimen/command_icon_size"
+                        android:layout_height="@dimen/command_icon_size"
+                        android:elevation="0dp"
+                        app:cardBackgroundColor="@color/purple_light"
+                        app:cardCornerRadius="@dimen/corner_radius_small">
+
+                        <ImageView
+                            android:layout_width="35dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="Anulación Multicomercio"
+                            android:src="@drawable/anulacion"
+                            android:tint="@color/purple_dark" />
+                    </androidx.cardview.widget.CardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_medium"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Anulación Multi-comercio"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_medium"
+                             />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xxsmall"
+                            android:ellipsize="end"
+                            android:maxLines="2"
+                            android:text="Anular transacciones MC"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small" />
+                    </LinearLayout>
+
+
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Devolución MC -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardRefundMC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/card_spacing"
+                android:clickable="true"
+                android:elevation="2dp"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:stateListAnimator="@null"
+                app:cardBackgroundColor="@color/card_background"
+                app:cardCornerRadius="@dimen/corner_radius_medium">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/card_padding_medium">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="@dimen/command_icon_size"
+                        android:layout_height="@dimen/command_icon_size"
+                        android:elevation="0dp"
+                        app:cardBackgroundColor="@color/teal_light"
+                        app:cardCornerRadius="@dimen/corner_radius_small">
+
+                        <ImageView
+                            android:layout_width="35dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="Devolución Multicomercio"
+                            android:src="@drawable/devolucion"
+                            android:tint="@color/teal_dark" />
+                    </androidx.cardview.widget.CardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_medium"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Devolución Multi-comercio"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_medium"
+                            />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xxsmall"
+                            android:ellipsize="end"
+                            android:maxLines="2"
+                            android:text="Devoluciones MC"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small" />
+                    </LinearLayout>
+
+
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Detalle MC -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardDetailMC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/card_spacing"
+                android:clickable="true"
+                android:elevation="2dp"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:stateListAnimator="@null"
+                app:cardBackgroundColor="@color/card_background"
+                app:cardCornerRadius="@dimen/corner_radius_medium">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/card_padding_medium">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="@dimen/command_icon_size"
+                        android:layout_height="@dimen/command_icon_size"
+                        android:elevation="0dp"
+                        app:cardBackgroundColor="@color/blue_light"
+                        app:cardCornerRadius="@dimen/corner_radius_small">
+
+                        <ImageView
+                            android:layout_width="35dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="Detalle Multicomercio"
+                            android:src="@drawable/detalle"
+                            android:tint="@color/blue_dark" />
+                    </androidx.cardview.widget.CardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_medium"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Detalle Multi-comercio"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_medium"
+                             />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xxsmall"
+                            android:ellipsize="end"
+                            android:maxLines="2"
+                            android:text="Detalle de ventas MC"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small" />
+                    </LinearLayout>
+
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Consultar MainPosData -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardMainPosData"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/card_spacing"
+                android:clickable="true"
+                android:elevation="2dp"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:stateListAnimator="@null"
+                app:cardBackgroundColor="@color/card_background"
+                app:cardCornerRadius="@dimen/corner_radius_medium">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/card_padding_medium">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="@dimen/command_icon_size"
+                        android:layout_height="@dimen/command_icon_size"
+                        android:elevation="0dp"
+                        app:cardBackgroundColor="@color/amber_light"
+                        app:cardCornerRadius="@dimen/corner_radius_small">
+
+                        <ImageView
+                            android:layout_width="35dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="Consultar MainPosData"
+                            android:src="@drawable/mainposdata"
+                            android:tint="@color/amber_dark" />
+                    </androidx.cardview.widget.CardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_medium"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="MainPosData"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_medium"
+                             />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xxsmall"
+                            android:ellipsize="end"
+                            android:maxLines="2"
+                            android:text="Obtener datos del comercio configurados en el POS"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

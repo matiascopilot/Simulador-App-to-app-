@@ -1,4 +1,4 @@
-package cl.ione.simuladorapptoapp
+package cl.ione.simuladorapptoapp.activitys
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import cl.getnet.payment.interop.parcels.SaleRequest
+import cl.ione.simuladorapptoapp.R
 import cl.ione.simuladorapptoapp.components.*
 import org.json.JSONObject
 
@@ -13,6 +14,7 @@ class VentaActivity : AppCompatActivity() {
 
     private val REQUEST_CODE = 3443
     private var isCommandsMode: Boolean = false
+    private var currentRequestJson: String = ""
 
     private lateinit var header: Header
     private lateinit var etAmount: EditText
@@ -33,7 +35,7 @@ class VentaActivity : AppCompatActivity() {
         setupSpinners()
         setupFooterButtons()
         setDefaultValues()
-        setupRequestManager() // ¡Solo esto necesitamos!
+        setupRequestManager()
     }
 
     private fun initViews() {
@@ -54,16 +56,11 @@ class VentaActivity : AppCompatActivity() {
             showBackButton = true,
             showRequestButton = true,
             onBackClick = { finish() }
-            // ¡No necesitamos onRequestClick aquí!
         )
     }
 
-    // 🎯 TODO EL MÁGICO REQUEST MANAGER EN UNA SOLA FUNCIÓN
     private fun setupRequestManager() {
-        // 1. Vincular el header con RequestManager
         RequestManager.bind(header)
-
-        // 2. Función que genera el JSON con los valores actuales
         val buildRequestJson = {
             val amount = etAmount.getCleanMoneyValue()
             val ticketNumber = etTicketNumber.text.toString()
@@ -97,29 +94,30 @@ class VentaActivity : AppCompatActivity() {
                 }
             }
         }
-
-        // 3. Vincular todos los campos automáticamente
         val titulo = if (isCommandsMode) "Venta JSON" else "Venta (Librería)"
 
         // Bind EditTexts
-        RequestManager.bindEditText(etAmount, etTicketNumber, etEmployeeId,
+        RequestManager.bindEditText(
+            etAmount, etTicketNumber, etEmployeeId,
             updateFunction = buildRequestJson,
             title = titulo
         )
 
         // Bind RadioGroup
-        RequestManager.bindRadioGroup(rgPrintOnPos,
+        RequestManager.bindRadioGroup(
+            rgPrintOnPos,
             updateFunction = buildRequestJson,
             title = titulo
         )
 
         // Bind Spinner
-        RequestManager.bindSpinner(spinnerSaleType,
+        RequestManager.bindSpinner(
+            spinnerSaleType,
             updateFunction = buildRequestJson,
             title = titulo
         )
 
-        // 4. Inicializar con valores por defecto
+        // Inicializar con valores por defecto
         RequestManager.initWithDefault(buildRequestJson, titulo)
     }
 
@@ -201,6 +199,7 @@ class VentaActivity : AppCompatActivity() {
             }
             """.trimIndent()
                 intent.putExtra("params", saleRequestJson)
+                currentRequestJson = saleRequestJson // Guardar el request
                 Log.d("VENTA_REQUEST", "JSON: $saleRequestJson")
             } else {
                 val request = SaleRequest(
@@ -214,7 +213,11 @@ class VentaActivity : AppCompatActivity() {
                     tdBsan = true
                 )
                 intent.putExtra("params", request)
-                Log.d("VENTA_REQUEST", "SaleRequest: $amount, $ticketNumber, $printOnPos, $saleType")
+                currentRequestJson = "Modo Librería - SaleRequest object" // Para referencia
+                Log.d(
+                    "VENTA_REQUEST",
+                    "SaleRequest: $amount, $ticketNumber, $printOnPos, $saleType"
+                )
             }
 
             startActivityForResult(intent, REQUEST_CODE)
@@ -272,39 +275,75 @@ class VentaActivity : AppCompatActivity() {
         return true
     }
 
+    // Crear un archivo separado o agregar en el companion object de la actividad
+    companion object {
+        fun extraerErrorDelIntent(data: Intent?): String {
+            if (data == null) return "No se recibió información de error"
+
+            // Posibles keys donde puede venir el error
+            val posiblesKeys = listOf(
+                "error", "message", "errorMessage",
+                "error_description", "detail", "error_detail",
+                "error_code", "status", "response"
+            )
+
+            // Buscar el primer key no nulo
+            for (key in posiblesKeys) {
+                data.getStringExtra(key)?.let {
+                    if (it.isNotBlank()) return "$key: $it"
+                }
+            }
+
+            // Si no encuentra, mostrar todos los extras
+            val extras = data.extras
+            if (extras != null && extras.size() > 0) {
+                val extrasInfo = buildString {
+                    append("Extras recibidos:\n")
+                    for (key in extras.keySet()) {
+                        append("• $key: ${extras.get(key)}\n")
+                    }
+                }
+                return extrasInfo
+            }
+
+            return "Error desconocido sin detalles adicionales"
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == REQUEST_CODE) {
+            val requestData = RequestManager.getCurrentRequest()
             when (resultCode) {
                 RESULT_OK -> {
-                    JsonParser.showVentaResult(this, data, isCommandsMode)
+                    JsonParser.showVentaResult(
+                        this,
+                        data,
+                        isCommandsMode,
+                        requestData = requestData
+                    )
                 }
+
                 RESULT_CANCELED -> {
-                    mostrarResultado("VENTA CANCELADA\n\nEl usuario canceló la transacción")
+                    // Usar el nuevo método del JsonParser
+                    JsonParser.showErrorWithRetry(
+                        activity = this,
+                        data = data,
+                        title = "VENTA CANCELADA",
+                        onRetry = { enviarVentaGetnet() }
+                    )
                 }
+
                 else -> {
-                    procesarRespuestaError(data)
+                    JsonParser.showErrorWithRetry(
+                        activity = this,
+                        data = data,
+                        title = "VENTA RECHAZADA",
+                        onRetry = { enviarVentaGetnet() }
+                    )
                 }
             }
         }
-    }
-
-    private fun procesarRespuestaError(data: Intent?) {
-        val errorMsg = data?.getStringExtra("error") ?:
-        data?.getStringExtra("message") ?:
-        "Error desconocido"
-        mostrarResultado("VENTA RECHAZADA\n\nMotivo: $errorMsg")
-    }
-
-    private fun mostrarResultado(mensaje: String) {
-        android.app.AlertDialog.Builder(this)
-            .setTitle("Resultado de Venta")
-            .setMessage(mensaje)
-            .setPositiveButton("ACEPTAR") { _, _ ->
-                finish()
-            }
-            .setCancelable(false)
-            .show()
     }
 }

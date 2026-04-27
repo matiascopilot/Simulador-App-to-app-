@@ -1,4 +1,4 @@
-package cl.ione.simuladorapptoapp
+package cl.ione.simuladorapptoapp.activitys
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import cl.getnet.payment.interop.parcels.SalesdetailRequest
 import cl.ione.simuladorapptoapp.databinding.ActivityDetalleVentaBinding
 import cl.ione.simuladorapptoapp.components.JsonParser
-import cl.ione.simuladorapptoapp.components.RequestDialog
+import cl.ione.simuladorapptoapp.components.RequestManager  // ← IMPORTAR
 import org.json.JSONObject
 
 class DetalleVentaActivity : AppCompatActivity() {
@@ -19,7 +19,6 @@ class DetalleVentaActivity : AppCompatActivity() {
  private var isCommandsMode: Boolean = false
  private var printOnPos: Boolean = true
  private var typeApp: Byte = 0
- private var currentRequestJson: String = "" // Para guardar el request actual
 
  override fun onCreate(savedInstanceState: Bundle?) {
   super.onCreate(savedInstanceState)
@@ -29,9 +28,8 @@ class DetalleVentaActivity : AppCompatActivity() {
   isCommandsMode = intent.getBooleanExtra("isCommandsMode", false)
   obtenerDatosIntent()
   configurarHeader()
+  setupRequestManager()  // ← NUEVO
   configurarListeners()
-  configurarActualizacionRequest() // Configurar actualización automática
-  actualizarRequestJson() // Generar request inicial
  }
 
  private fun obtenerDatosIntent() {
@@ -47,17 +45,34 @@ class DetalleVentaActivity : AppCompatActivity() {
   binding.header.setup(
    title = titulo,
    showBackButton = true,
-   showRequestButton = true, // Mostrar botón de request
-   onBackClick = { finish() },
-   onRequestClick = {
-    // Mostrar el request actual
-    if (currentRequestJson.isNotEmpty()) {
-     binding.header.showRequestJson(currentRequestJson, "REQUEST DETALLE")
-    } else {
-     Toast.makeText(this, "No hay request para mostrar", Toast.LENGTH_SHORT).show()
+   showRequestButton = true,
+   onBackClick = { finish() }
+   // onRequestClick lo maneja RequestManager
+  )
+ }
+
+ private fun setupRequestManager() {
+  // 1. Vincular el header con RequestManager
+  RequestManager.bind(binding.header)
+
+  // 2. Función que genera el JSON con los valores actuales
+  val buildRequestJson = {
+   if (isCommandsMode) {
+    JSONObject().apply {
+     put("PrintOnPos", printOnPos)
+     put("TypeApp", typeApp)
+    }
+   } else {
+    JSONObject().apply {
+     put("PrintOnPos", printOnPos)
+     put("TypeApp", typeApp)
     }
    }
-  )
+  }
+
+  // 3. Inicializar con valores por defecto
+  val titulo = if (isCommandsMode) "Detalle JSON" else "Detalle de Venta"
+  RequestManager.initWithDefault(buildRequestJson, titulo)
  }
 
  private fun configurarListeners() {
@@ -70,35 +85,6 @@ class DetalleVentaActivity : AppCompatActivity() {
 
   binding.btnIniciarVenta.setOnClickListener {
    iniciarDetalleVenta()
-  }
- }
-
- // Configurar actualización automática (aunque no hay campos editables, igual generamos el JSON)
- private fun configurarActualizacionRequest() {
-  // Como no hay campos editables, solo necesitamos actualizar cuando cambien las variables
-  // pero como vienen del intent, no cambian
- }
-
- // Actualizar el JSON del request con los valores actuales
- private fun actualizarRequestJson() {
-  try {
-   val jsonObject = if (isCommandsMode) {
-    JSONObject().apply {
-     put("PrintOnPos", printOnPos)
-     put("TypeApp", typeApp)
-    }
-   } else {
-    JSONObject().apply {
-     put("PrintOnPos", printOnPos)
-     put("TypeApp", typeApp)
-     put("originRequestApp", 1)
-    }
-   }
-
-   currentRequestJson = jsonObject.toString(4)
-
-  } catch (e: Exception) {
-   currentRequestJson = "{\"error\": \"Error generando request: ${e.message}\"}"
   }
  }
 
@@ -120,21 +106,7 @@ class DetalleVentaActivity : AppCompatActivity() {
     intent.putExtra("params", request)
     Log.d(TAG, "SalesdetailRequest: $printOnPos, $typeApp")
    }
-
-   // Opcional: originRequestApp = 1
-   intent.putExtra("originRequestApp", 1)
-
-   val actividades = packageManager.queryIntentActivities(intent, 0)
-   if (actividades.isNotEmpty()) {
     startActivityForResult(intent, REQUEST_CODE_DETALLE)
-    // Actualizar request después de enviar
-    actualizarRequestJson()
-   } else {
-    Toast.makeText(this,
-     "Getnet no está disponible en este dispositivo",
-     Toast.LENGTH_LONG).show()
-   }
-
   } catch (e: Exception) {
    Log.e(TAG, "Error: ${e.message}", e)
    Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
@@ -145,7 +117,31 @@ class DetalleVentaActivity : AppCompatActivity() {
   super.onActivityResult(requestCode, resultCode, data)
 
   if (requestCode == REQUEST_CODE_DETALLE) {
-   JsonParser.showDetalleVentaResult(this, data)
+   val requestData = RequestManager.getCurrentRequest()
+
+   when (resultCode) {
+    RESULT_OK -> {
+     JsonParser.showDetalleVentaResult(this, data, requestData = requestData)
+    }
+
+    RESULT_CANCELED -> {
+     JsonParser.showErrorWithRetry(
+      activity = this,
+      data = data,
+      title = "DETALLE CANCELADO",
+      onRetry = { iniciarDetalleVenta() }
+     )
+    }
+
+    else -> {
+     JsonParser.showErrorWithRetry(
+      activity = this,
+      data = data,
+      title = "DETALLE RECHAZADO",
+      onRetry = { iniciarDetalleVenta() }
+     )
+    }
+   }
   }
  }
 }

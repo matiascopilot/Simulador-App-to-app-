@@ -26,7 +26,32 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Monto -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="RUT Comercio Hijo"
+                app:boxBackgroundColor="?attr/colorSurface"
+                app:boxStrokeColor="?attr/colorOnSurface"
+                app:hintTextColor="?attr/colorOnSurface"
+                app:placeholderText="Ej: 12.345.678-5"
+                app:endIconMode="clear_text">
+
+                <cl.ione.simuladorapptoapp.components.RutEditText
+                    android:id="@+id/etRutCommerceSon"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:inputType="text"
+                    android:maxLength="12"
+                    android:padding="12dp"
+                    android:text="09.091.125-2"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Monto (SEGUNDO) -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -36,7 +61,8 @@
                 app:boxBackgroundColor="?attr/colorSurface"
                 app:boxStrokeColor="?attr/colorOnSurface"
                 app:hintTextColor="?attr/colorOnSurface"
-                app:placeholderText="Ej: $1.000">
+                app:placeholderText="Ej: $1.000"
+                app:endIconMode="clear_text">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAmount"
@@ -44,30 +70,6 @@
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:maxLength="12"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="16sp" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Ticket Number -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Ticket Number"
-                app:boxBackgroundColor="?attr/colorSurface"
-                app:boxStrokeColor="?attr/colorOnSurface"
-                app:counterEnabled="true"
-                app:counterMaxLength="24"
-                app:hintTextColor="?attr/colorOnSurface"
-                app:placeholderText="Ej: ABC123">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etTicketNumber"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text"
                     android:textColor="?attr/colorOnSurface"
                     android:textSize="16sp" />
 
@@ -127,99 +129,6 @@
                 android:background="@drawable/input_background"
                 android:paddingHorizontal="12dp"
                 android:popupBackground="?attr/colorSurface" />
-
-            <!-- EmployeeId -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Employee ID"
-                app:boxBackgroundColor="?attr/colorSurface"
-                app:boxStrokeColor="?attr/colorOnSurface"
-                app:counterEnabled="true"
-                app:counterMaxLength="4"
-                app:hintTextColor="?attr/colorOnSurface"
-                app:placeholderText="Ej: 1">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEmployeeId"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="16sp" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- ID Sucursal (SOLO UNA VEZ) -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="ID Sucursal"
-                app:boxBackgroundColor="?attr/colorSurface"
-                app:boxStrokeColor="?attr/colorOnSurface"
-                app:hintTextColor="?attr/colorOnSurface"
-                app:placeholderText="Ej: 10606">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etIdSucursal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:text="10606"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="16sp" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- ID Terminal (SOLO UNA VEZ) -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="ID Terminal"
-                app:boxBackgroundColor="?attr/colorSurface"
-                app:boxStrokeColor="?attr/colorOnSurface"
-                app:hintTextColor="?attr/colorOnSurface"
-                app:placeholderText="Ej: 80000039">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etIdTerminal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:text="80000039"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="16sp" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Serial Number -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Serial Number"
-                app:boxBackgroundColor="?attr/colorSurface"
-                app:boxStrokeColor="?attr/colorOnSurface"
-                app:hintTextColor="?attr/colorOnSurface"
-                app:placeholderText="Ej: 123456789012">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etSerialNumber"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text"
-                    android:text="123456789012"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="16sp" />
-
-            </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
 
